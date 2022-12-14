@@ -14,6 +14,7 @@ import { Table } from "./Table"
 import { constructDeck } from "../utils/constructDeck"
 import { useSockets } from "../context/SocketContext"
 import { blackjackCalldata } from "../../zkproof/snarkjsBlackjack"
+import { Ace, Card, Sum } from "../context/SocketContext"
 
 interface IProps {
   library: ethers.providers.Web3Provider
@@ -36,7 +37,7 @@ export const Game: React.FC<IProps> = ({
   room,
 }) => {
   const [isGameActive, setIsGameActive] = useState<boolean>(false)
-
+  const [isStandSingle, setIsStandSingle] = useState(false)
   const [currentDeck, setCurrentDeck] = useState<string[]>([])
   const [isStandPlayerOne, setIsStandPlayerOne] = useState(false)
   const [isStandPlayerTwo, setIsStandPlayerTwo] = useState(false)
@@ -325,76 +326,86 @@ export const Game: React.FC<IProps> = ({
     }
   }
 
-  // const constructDeck = () => {
-  //   const cardValues: string[] = [
-  //     "A",
-  //     "2",
-  //     "3",
-  //     "4",
-  //     "5",
-  //     "6",
-  //     "7",
-  //     "8",
-  //     "9",
-  //     "10",
-  //     "J",
-  //     "Q",
-  //     "K",
-  //   ]
-  //   const cardTypes: string[] = ["D", "C", "H", "S"]
+  const constructDeck = () => {
+    const cardValues: string[] = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ]
+    const cardTypes: string[] = ["D", "C", "H", "S"]
 
-  //   if (isSinglePlayer) {
-  //     for (let i = 0; i < cardTypes.length; i++) {
-  //       for (let j = 0; j < cardValues.length; j++) {
-  //         deck.push(cardValues[j] + "-" + cardTypes[i])
-  //       }
-  //     }
-  //   } else {
-  //     for (let i = 0; i < 2; i++) {
-  //       for (let i = 0; i < cardTypes.length; i++) {
-  //         for (let j = 0; j < cardValues.length; j++) {
-  //           deck.push(cardValues[j] + "-" + cardTypes[i])
-  //         }
-  //       }
-  //     }
-  //   }
+    if (isSinglePlayer) {
+      for (let i = 0; i < cardTypes.length; i++) {
+        for (let j = 0; j < cardValues.length; j++) {
+          deck.push(cardValues[j] + "-" + cardTypes[i])
+        }
+      }
+    } else {
+      for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < cardTypes.length; i++) {
+          for (let j = 0; j < cardValues.length; j++) {
+            deck.push(cardValues[j] + "-" + cardTypes[i])
+          }
+        }
+      }
+    }
 
-  //   for (let i = 0; i < deck.length; i++) {
-  //     const randomNumber = Math.floor(Math.random() * deck.length)
-  //     const currentCard = deck[i]
-  //     deck[i] = deck[randomNumber] ?? ""
-  //     deck[randomNumber] = currentCard ?? ""
-  //   }
-  //   setCurrentDeck(deck)
-  //   return deck
-  // }
+    for (let i = 0; i < deck.length; i++) {
+      const randomNumber = Math.floor(Math.random() * deck.length)
+      const currentCard = deck[i]
+      deck[i] = deck[randomNumber] ?? ""
+      deck[randomNumber] = currentCard ?? ""
+    }
+    setCurrentDeck(deck)
+    return deck
+  }
 
-  // const getCard = (deckData: string[]) => {
-  //   if (sums.playerOneSum >= 21) {
-  //     toast.error("You can't get more cards", {
-  //       position: "top-center",
-  //       autoClose: 3000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: false,
-  //       draggable: true,
-  //       progress: undefined,
-  //     })
-  //   } else {
-  //     const tempDeck = deckData
-  //     let playerValue = 0
-  //     const playerCard = tempDeck.pop()
-  //     const cardImage = `/cards/${playerCard}.svg`
-  //     const value = getValue(playerCard!)
-  //     playerValue += value!
-  //     if (value == 11) {
-  //       setAceNumberPlayerOne((prevState) => prevState + 1)
-  //     }
-  //     setPlayerOneCards((prevState: string[]) => [...prevState!, cardImage])
-  //     setPlayerOneSum((prevState: number) => prevState + playerValue)
-  //     setCurrentDeck(tempDeck)
-  //   }
-  // }
+  const getCard = (deckData: string[]) => {
+    if (sums.playerOneSum >= 21) {
+      toast.error("You can't get more cards", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+      })
+    } else {
+      const tempDeck = deckData
+      let playerValue = 0
+      const playerCard = tempDeck.pop()
+      const cardImage = `/cards/${playerCard}.svg`
+      const value = getValue(playerCard!)
+      playerValue += value!
+      if (value == 11) {
+        setAces((prevState: Ace) => ({
+          ...prevState,
+          playerOneAces: prevState.playerOneAces + 1,
+        }))
+      }
+      setCards((prevState: Card) => ({
+        ...prevState,
+        playerOneCards: [...prevState.playerOneCards, cardImage],
+      }))
+
+      setSums((prevState: Sum) => ({
+        ...prevState,
+        playerOneSum: prevState.playerOneSum + playerValue,
+      }))
+      setCurrentDeck(tempDeck)
+    }
+  }
 
   useEffect(() => {
     if (deckData.deckCards.length <= 4) {
@@ -416,184 +427,167 @@ export const Game: React.FC<IProps> = ({
     setIsGameActive(isGameStarted)
   }, [socket])
 
+  useEffect(() => {
+    const firstDeck = constructDeck()
+    dealCards(firstDeck)
+  }, [isSinglePlayer])
+
   // useEffect(() => {
   //   checkAce()
   // }, [sums.playerOneSum,sums.playerTwoSum])
 
-  // const dealCards = (deckData: string[]) => {
-  //   let usedDeck: string[] = deckData
+  const dealCards = (deckData: string[]) => {
+    let usedDeck: string[] = deckData
 
-  //   if (deckData.length >= 4) {
-  //     // setRoundText([])
+    if (deckData.length >= 4) {
+      // setRoundText([])
 
-  //     setAces({
-  //       playerOneAces: 0,
-  //       playerTwoAces: 0,
-  //       houseAces: 0,
-  //     })
+      setAces({
+        playerOneAces: 0,
+        playerTwoAces: 0,
+        houseAces: 0,
+      })
 
-  //     // setIsStand(false)
-  //     let houseValue = 0
-  //     const housecurrentCards: string[] = []
-  //     for (let i = 0; i < 2; i++) {
-  //       const dealerCard = usedDeck?.pop()
+      // setIsStand(false)
+      let houseValue = 0
+      const housecurrentCards: string[] = []
+      for (let i = 0; i < 2; i++) {
+        const dealerCard = usedDeck?.pop()
 
-  //       const cardImage = `/cards/${dealerCard}.svg`
+        const cardImage = `/cards/${dealerCard}.svg`
 
-  //       const value = getValue(dealerCard!)
-  //       houseValue += value!
-  //       housecurrentCards.push(cardImage)
-  //       if (value == 11) {
-  //         // setAces({...aces, houseAces : aces.houseAces + 1})
-  //         setAces((prevAces: any) => ({
-  //           ...prevAces,
-  //           houseAces: prevAces.houseAces + 1,
-  //         }))
-  //       }
-  //     }
+        const value = getValue(dealerCard!)
+        houseValue += value!
+        housecurrentCards.push(cardImage)
+        if (value == 11) {
+          // setAces({...aces, houseAces : aces.houseAces + 1})
+          setAces((prevAces: any) => ({
+            ...prevAces,
+            houseAces: prevAces.houseAces + 1,
+          }))
+        }
+      }
 
-  //     while (houseValue < 17) {
-  //       if (usedDeck.length === 2) {
-  //         break
-  //       }
-  //       const dealerCard = usedDeck.pop()
-  //       const cardImage = `/${dealerCard}.png`
-  //       housecurrentCards.push(cardImage)
+      while (houseValue < 17) {
+        if (usedDeck.length === 2) {
+          break
+        }
+        const dealerCard = usedDeck.pop()
+        const cardImage = `/${dealerCard}.png`
+        housecurrentCards.push(cardImage)
 
-  //       const value = getValue(dealerCard!)
-  //       if (value == 11) {
-  //         setAces((prevAces: any) => ({
-  //           ...prevAces,
-  //           houseAces: prevAces.houseAces + 1,
-  //         }))
-  //       }
+        const value = getValue(dealerCard!)
+        if (value == 11) {
+          setAces((prevAces: any) => ({
+            ...prevAces,
+            houseAces: prevAces.houseAces + 1,
+          }))
+        }
 
-  //       houseValue += value!
-  //     }
+        houseValue += value!
+      }
 
-  //     // setHouseSum((prevState: number) => prevState + houseValue)
-  //     setSums((prevSums: any) => ({
-  //       ...prevSums,
-  //       houseSum: prevSums.houseSum + houseValue,
-  //     }))
-  //     setCards((prevCards: any) => ({
-  //       ...prevCards,
-  //       houseCards: housecurrentCards,
-  //     }))
+      setSums((prevSums: any) => ({
+        ...prevSums,
+        houseSum: prevSums.houseSum + houseValue,
+      }))
+      setCards((prevCards: any) => ({
+        ...prevCards,
+        houseCards: housecurrentCards,
+      }))
 
-  //     // setHouseCards(housecurrentCards)
+      let playerOneValue = 0
 
-  //     let playerOneValue = 0
-  //     let playerTwoValue = 0
-  //     const playerOneCurrentCards: string[] = []
-  //     const playerTwoCurrentCards: string[] = []
+      const playerOneCurrentCards: string[] = []
 
-  //     for (let i = 0; i < 2; i++) {
-  //       const playerCard = usedDeck.pop()
-  //       const cardImage = `/cards/${playerCard}.svg`
-  //       playerOneCurrentCards.push(cardImage)
-  //       const value = getValue(playerCard!)
-  //       playerOneValue += value!
-  //       if (value == 11) {
-  //         // setAceNumberPlayerOne((prevState) => prevState + 1)
-  //         setAces((prevAces: any) => ({
-  //           ...prevAces,
-  //           playerOneAces: prevAces.playerOneAces + 1,
-  //         }))
-  //       }
-  //     }
-  //     for (let i = 0; i < 2; i++) {
-  //       const playerCard = usedDeck.pop()
-  //       const cardImage = `/cards/${playerCard}.svg`
-  //       playerTwoCurrentCards.push(cardImage)
-  //       const value = getValue(playerCard!)
-  //       playerTwoValue += value!
-  //       if (value == 11) {
-  //         setAces((prevAces: any) => ({
-  //           ...prevAces,
-  //           playerTwoAces: prevAces.playerTwoAces + 1,
-  //         }))
-  //       }
-  //     }
-  //     setCards((prevCards: any) => ({
-  //       ...prevCards,
-  //       playerOneCards: playerOneCurrentCards,
-  //       playerTwoCards: playerTwoCurrentCards,
-  //     }))
-  //     setSums((prevSums: any) => ({
-  //       ...prevSums,
-  //       playerOneSum: prevSums.playerOneSum + playerOneValue,
-  //       playerTwoSum: prevSums.playerTwoSum + playerTwoValue,
-  //     }))
-  //     setStartDeck(usedDeck)
+      for (let i = 0; i < 2; i++) {
+        const playerCard = usedDeck.pop()
+        const cardImage = `/cards/${playerCard}.svg`
+        playerOneCurrentCards.push(cardImage)
+        const value = getValue(playerCard!)
+        playerOneValue += value!
+        if (value == 11) {
+          // setAceNumberPlayerOne((prevState) => prevState + 1)
+          setAces((prevAces: any) => ({
+            ...prevAces,
+            playerOneAces: prevAces.playerOneAces + 1,
+          }))
+        }
+      }
 
-  //     // setPlayerOneCards(playerOneCurrentCards)
-  //     // setPlayerOneSum(playerOneValue)
-  //     // setPlayerTwoCards(playerTwoCurrentCards)
-  //     // setPlayerTwoSum(playerTwoValue)
+      setCards((prevCards: any) => ({
+        ...prevCards,
+        playerOneCards: playerOneCurrentCards,
+      }))
+      setSums((prevSums: any) => ({
+        ...prevSums,
+        playerOneSum: prevSums.playerOneSum + playerOneValue,
+      }))
+      setCurrentDeck(usedDeck)
 
-  //     const emitData = {
-  //       playerOneCards: playerOneCurrentCards,
-  //       playerTwoCards: playerTwoCurrentCards,
-  //       playerOneSum: sums.playerOneSum,
-  //       playerTwoSum: sums.playerTwoSum,
-  //       houseSum: sums.houseSum,
-  //       houseCards: housecurrentCards,
-  //     }
+      if (
+        deckData.length <= 4 &&
+        cards.playerOneCards.length < 2 &&
+        cards.playerTwoCards.length < 2
+      ) {
+        // setIsGameActive(false)
+        // setIsStand(true)
+        // toast.error("No more cards left. This is the final round!", {
+        //   position: "top-center",
+        //   autoClose: 3000,
+        //   hideProgressBar: true,
+        //   closeOnClick: true,
+        //   pauseOnHover: false,
+        //   draggable: true,
+        //   progress: undefined,
+        // })
+      }
+    } else {
+      // setIsGameActive(false)
+    }
+  }
 
-  //     socket.emit("card_dealt", emitData)
+  const checkAce = () => {
+    if (sums.playerOneSum > 21 && aces.playerOneAces !== 0) {
+      setSums((prevSums: Sum) => ({
+        ...prevSums,
+        playerOneSum: prevSums.playerOneSum - 10,
+      }))
 
-  //     if (
-  //       deckData.length <= 4 &&
-  //       cards.playerOneCards.length < 2 &&
-  //       cards.playerTwoCards.length < 2
-  //     ) {
-  //       // setIsGameActive(false)
-  //       // setIsStand(true)
-  //       // toast.error("No more cards left. This is the final round!", {
-  //       //   position: "top-center",
-  //       //   autoClose: 3000,
-  //       //   hideProgressBar: true,
-  //       //   closeOnClick: true,
-  //       //   pauseOnHover: false,
-  //       //   draggable: true,
-  //       //   progress: undefined,
-  //       // })
-  //     }
-  //   } else {
-  //     // setIsGameActive(false)
-  //   }
-  // }
+      setAces((prevState: Ace) => ({
+        ...prevState,
+        playerOneAces: prevState.playerOneAces - 1,
+      }))
 
-  // const checkAce = () => {
-  //   if (sums.playerOneSum > 21 && aces.playerOneAces !== 0) {
-  //     setSums((prevSums: any) => ({
-  //       ...prevSums,
-  //       playerOneSum: prevSums.playerOneSum - 10,
-  //     }))
+      return true
+    }
+    // if (playerTwoSum > 21 && aceNumberPlayerTwo !== 0) {
+    //   setPlayerOneSum((prevState: number) => prevState - 10)
 
-  //     setAceNumberPlayerOne((prevState) => prevState - 1)
+    //   setAceNumberPlayerTwo((prevState) => prevState - 1)
 
-  //     return true
-  //   }
-  //   if (playerTwoSum > 21 && aceNumberPlayerTwo !== 0) {
-  //     setPlayerOneSum((prevState: number) => prevState - 10)
+    //   return true
+    // }
+    if (sums.houseSum > 21 && aces.houseAces !== 0) {
+      // setHouseSum((prevState: number) => prevState - 10)
+      setSums((prevState: Sum) => ({
+        ...prevState,
+        houseSum: prevState.houseSum - 10,
+      }))
 
-  //     setAceNumberPlayerTwo((prevState) => prevState - 1)
+      setAces((prevState: Ace) => ({
+        ...prevState,
+        houseAces: prevState.playerOneAces - 1,
+      }))
 
-  //     return true
-  //   }
-  //   if (houseSum > 21 && aceNumberHouse !== 0) {
-  //     setHouseSum((prevState: number) => prevState - 10)
-
-  //     setAceNumberHouse((prevState) => prevState - 1)
-  //     return true
-  //   }
-  // }
+      // setAceNumberHouse((prevState) => prevState - 1)
+      return true
+    }
+  }
 
   // const getWinner = () => {
-  //   setIsStand(true)
-  //   if (playerOneSum > 21) {
+  //   setIsStandSingle(true)
+  //   if (suplayerOneSum > 21) {
   //     setRoundText(["You", "Lost!"])
   //     setScore((prevState) => prevState! - 1)
   //   } else if (houseSum > 21) {
@@ -905,6 +899,8 @@ export const Game: React.FC<IProps> = ({
     // </>
     <div>
       <Table
+        isSinglePlayer={true}
+        getCard={getCard}
         library={library}
         account={account}
         socket={socket}

@@ -22,18 +22,24 @@ interface IProps {
   library: ethers.providers.Web3Provider
   account: string
   socket: any
+  setIsSinglePlayer: (val: boolean) => void
+  isSinglePlayer: boolean
 }
 
 interface TransactionResponse {
   hash: string
 }
 
-const Home: NextPage<IProps> = ({ library, account }) => {
+const Home: NextPage<IProps> = ({
+  library,
+  account,
+  isSinglePlayer,
+  setIsSinglePlayer,
+}) => {
   // const [library, setLibrary] = useState<ethers.providers.Web3Provider>()
   // const [account, setAccount] = useState<string>("")
   // const [provider, setProvider] = useState()
   const [isJoin, setIsJoin] = useState<boolean>(false)
-  const [isSinglePlayer, setIsSinglePlayer] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
   const [room, setRoom] = useState("")
@@ -201,7 +207,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
       )
 
       const confirmation = await library.waitForTransaction(createGame.hash)
-
+      setIsSinglePlayer(true)
       console.log("game room", gameRoom)
 
       router.push(`/room/${gameRoom}`)
@@ -251,13 +257,43 @@ const Home: NextPage<IProps> = ({ library, account }) => {
           </div> */}
         </nav>
         {isGameStarted ? (
-          <div className="mt-12">
+          <div className="flex justify-center  relative top-64 left-0 z-20 ">
             {" "}
             {/* <Game
               isSinglePlayer={isSinglePlayer}
               library={library!}
               account={account}
             /> */}
+            {/* <Image
+              src={"/loader.svg"}
+              width={64}
+              height={64}
+              layout="fixed"
+              className=""
+            /> */}
+            {/* <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle className="spinner_ZCsl" cx="12" cy="12" r="0" />
+              <circle
+                className="spinner_ZCsl spinner_gaIW"
+                cx="12"
+                cy="12"
+                r="0"
+              />
+            </svg> */}
+            <svg
+              width="36"
+              height="36"
+              fill="#fff"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <ellipse className="spinner_rXNP" cx="12" cy="5" rx="4" ry="4" />
+            </svg>
           </div>
         ) : (
           <div className="grid items-center justify-center grid-cols-3 mt-20 lg:-mt-4">
@@ -316,6 +352,18 @@ const Home: NextPage<IProps> = ({ library, account }) => {
           </div>
         )}
       </main>
+      <ToastContainer
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   )
 }

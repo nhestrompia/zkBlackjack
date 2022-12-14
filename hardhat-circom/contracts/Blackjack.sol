@@ -105,6 +105,7 @@ contract Blackjack is Ownable {
     function joinGame(uint16 _gameId) external payable {
       require(games[_gameId].isGameActive == true,"Game is not active");
       require(games[_gameId].player2Address == address(0),"Game room is full");
+      require(games[_gameId].isSinglePlayer == false,"This room is a single player");
       require(msg.value >= betAmount, "Not enough ETH sent");
       players[msg.sender] = Player(betAmount,gameId,games[_gameId].player1Address);
       games[_gameId].player2Address = msg.sender;

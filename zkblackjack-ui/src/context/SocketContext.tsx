@@ -40,17 +40,17 @@ interface PlayerInfo {
   sum: number
 }
 
-interface Ace {
+export interface Ace {
   playerOneAces: number
   playerTwoAces: number
   houseAces: number
 }
-interface Card {
+export interface Card {
   playerOneCards: string[]
   playerTwoCards: string[]
   houseCards: string[]
 }
-interface Sum {
+export interface Sum {
   playerOneSum: number
   playerTwoSum: number
   houseSum: number

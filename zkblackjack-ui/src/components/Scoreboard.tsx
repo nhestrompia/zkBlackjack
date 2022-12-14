@@ -5,20 +5,27 @@ interface IProps {
   playerOne: string
   roundText: Array<string>
   playerTwo: string
+  isSinglePlayer: boolean
 }
 
 export const Scoreboard: React.FC<IProps> = ({
   playerOne,
   roundText,
-
+  isSinglePlayer,
   playerTwo,
 }) => {
   return (
-    <div className="grid text-white font-poppins grid-cols-2 text-center mt-4 ml-10 justify-center w-64 h-64 bg-transparent rounded-xl">
+    <div
+      className={`grid text-white font-poppins grid-cols-2 text-center mt-4 ${
+        isSinglePlayer ? "ml-16" : "ml-10"
+      } ml-10 justify-center w-64 h-64 bg-transparent rounded-xl`}
+    >
       <div
         className={`col-start-1 col-span-1 ${
           roundText.length > 0 ? "border-b-2 border-b-white" : ""
-        } border-r-2 border-r-white border-opacity-20`}
+        } ${
+          isSinglePlayer ? "" : "border-r-2 border-r-white "
+        }border-opacity-20`}
       >
         <h1 className=" border-b-2 border-b-white pb-2 border-opacity-20">
           {playerOne ? truncateEthAddress(playerOne) : "Player 1"}
@@ -35,11 +42,13 @@ export const Scoreboard: React.FC<IProps> = ({
             : ""}
         </div>
       </div>
-      <div className="col-start-2 col-span-1  ">
-        <h1 className="border-b-2 border-b-white pb-2 border-opacity-20">
-          {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
-        </h1>
-      </div>
+      {!isSinglePlayer && (
+        <div className="col-start-2 col-span-1  ">
+          <h1 className="border-b-2 border-b-white pb-2 border-opacity-20">
+            {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
+          </h1>
+        </div>
+      )}
     </div>
   )
 }

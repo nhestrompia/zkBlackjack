@@ -12,6 +12,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   const [account, setAccount] = useState<string>("")
   const [provider, setProvider] = useState()
   const [socket, setSocket] = useState<Socket>()
+  const [isSinglePlayer, setIsSinglePlayer] = useState<boolean>(false)
 
   // useEffect(() => {
   //   const socketInstance = io("http://localhost:3001")
@@ -36,24 +37,24 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   //   }
   // }, [])
 
-  useEffect(() => {
-    if (!socket) return
+  // useEffect(() => {
+  //   if (!socket) return
 
-    socket!.on("connect", () => {
-      console.log("socket connected")
-    })
+  //   socket!.on("connect", () => {
+  //     console.log("socket connected")
+  //   })
 
-    const deckListener = (data: string[]) => {
-      console.log("app asdadasdadgfdöbvbvd", data)
-    }
+  //   const deckListener = (data: string[]) => {
+  //     console.log("app asdadasdadgfdöbvbvd", data)
+  //   }
 
-    socket!.on("new_player", deckListener)
+  //   socket!.on("new_player", deckListener)
 
-    return () => {
-      socket.off("connect")
-      socket.off("new_player")
-    }
-  }, [socket])
+  //   return () => {
+  //     socket.off("connect")
+  //     socket.off("new_player")
+  //   }
+  // }, [socket])
 
   return (
     <>
@@ -70,6 +71,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           {...pageProps}
           library={library!}
           account={account}
+          isSinglePlayer={isSinglePlayer}
+          setIsSinglePlayer={setIsSinglePlayer}
           // socket={socket}
         />
       </SocketsProvider>
