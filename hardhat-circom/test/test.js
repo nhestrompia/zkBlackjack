@@ -112,6 +112,22 @@ describe("Blackjack contract", function () {
 
       await expect(gameMapping.player1Address).to.equal(addr1.address)
       await expect(gameMapping.player2Address).to.equal(addr2.address)
+      await expect(gameMapping.isSinglePlayer).to.equal(false)
+    })
+    it("Should not let another user to join to room if it is a single player room", async function () {
+      const { blackjack, owner, addr1, addr2 } = await loadFixture(
+        deployContractFixture
+      )
+      const gameRoom = await blackjack.gameId()
+      const startGame = await blackjack
+        .connect(addr1)
+        .startSinglePlayerGame({ value: ethers.utils.parseEther("0.01") })
+
+      await expect(
+        blackjack
+          .connect(addr2)
+          .joinGame(gameRoom, { value: ethers.utils.parseEther("0.01") })
+      ).to.revertedWith("This room is a single player")
     })
 
     it("Should not let player withdraw bet before game ended", async function () {

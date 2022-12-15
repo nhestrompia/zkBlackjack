@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useContext } from "react"
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useReducer,
+  useContext,
+} from "react"
 import { BigNumber, Contract, ethers, providers, utils } from "ethers"
 import {
   BLACKJACK_CONTRACT_ABI,
@@ -28,6 +34,35 @@ interface TransactionResponse {
   hash: string
 }
 
+export interface RoundResult {
+  playerOne: string[]
+  playerTwo: string[]
+}
+
+// enum LeaderboardActionKind {
+//   WIN_ROUND = "win-round",
+//   LOSE_ROUND = "lose-round",
+//   DRAW_ROUND = "draw-round",
+// }
+
+// interface LeaderboardAction {
+//   type: LeaderboardActionKind
+//   payload: string
+// }
+
+// const reducer = (state: Array<string>, action: LeaderboardAction) => {
+//   switch (action.type) {
+//     case LeaderboardActionKind.WIN_ROUND:
+//       return [...state, action.payload]
+//     case LeaderboardActionKind.LOSE_ROUND:
+//       return [...state, action.payload]
+//     case LeaderboardActionKind.DRAW_ROUND:
+//       return [...state, action.payload]
+//     default:
+//       throw new Error(`Unhandled  action type ${action.type}`)
+//   }
+// }
+
 export const Game: React.FC<IProps> = ({
   library,
   account,
@@ -37,12 +72,16 @@ export const Game: React.FC<IProps> = ({
   room,
 }) => {
   const [isGameActive, setIsGameActive] = useState<boolean>(false)
-  const [isStandSingle, setIsStandSingle] = useState(false)
+  // const [isStandSingle, setIsStandSingle] = useState(false)
+  // const [roundText, dispatch] = useReducer(reducer, [])
   const [currentDeck, setCurrentDeck] = useState<string[]>([])
   const [isStandPlayerOne, setIsStandPlayerOne] = useState(false)
   const [isStandPlayerTwo, setIsStandPlayerTwo] = useState(false)
   const [score, setScore] = useState<number>()
-  const [roundText, setRoundText] = useState<string[]>([])
+  const [roundText, setRoundText] = useState<RoundResult>({
+    playerOne: [],
+    playerTwo: [],
+  })
   const [isCanWithdraw, setIsCanWithdraw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isGameEnded, setIsGameEnded] = useState<boolean>(false)
@@ -61,12 +100,20 @@ export const Game: React.FC<IProps> = ({
     deckData,
   } = useSockets()
 
+  // const handleClick = (player: string) => {
+  //   if (player === "1") {
+  //     dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
+  //   } else {
+  //     dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
+  //   }
+  // }
+
   const effectRan = useRef(false)
   // const socket = useContext(SocketContext)
 
   useEffect(() => {
     if (effectRan.current === false) {
-      setRoundText([])
+      // setRoundText([])
       setIsCanWithdraw(false)
       setIsGameActive(false)
       setIsGameEnded(false)
@@ -143,7 +190,7 @@ export const Game: React.FC<IProps> = ({
         )
         const confirmation = await library.waitForTransaction(tx.hash)
       }
-      setRoundText(["Play", "Again"])
+      // setRoundText(["Play", "Again"])
       setIsGameEnded(false)
       setIsCanWithdraw(false)
     } catch (err) {
@@ -168,7 +215,7 @@ export const Game: React.FC<IProps> = ({
               progress: 0,
             }
           )
-          setRoundText(["Wait for", `Evaluation`])
+          // setRoundText(["Wait for", `Evaluation`])
         } else if (score === 0) {
           toast.info(
             "It was a close game but it ended in tie. Wait for withdraw button to come to get back your initial bet",
@@ -182,7 +229,7 @@ export const Game: React.FC<IProps> = ({
               progress: 0,
             }
           )
-          setRoundText(["Wait for", `Evaluation`])
+          // setRoundText(["Wait for", `Evaluation`])
         } else {
           toast.info(
             "It was a close game but you have lost it. Play again to earn back your 0.01 ETH ",
@@ -196,7 +243,7 @@ export const Game: React.FC<IProps> = ({
               progress: 0,
             }
           )
-          setRoundText(["Wait for", `Evaluation`])
+          // setRoundText(["Wait for", `Evaluation`])
         }
         setIsGameActive(false)
         setLoading(true)
@@ -283,7 +330,7 @@ export const Game: React.FC<IProps> = ({
 
         setIsCanWithdraw(false)
       }
-      setRoundText(["Play", "Again"])
+      // setRoundText(["Play", "Again"])
     } catch (err) {
       console.error(err)
     }
@@ -424,12 +471,16 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     // setCurrentDeck(startDeck)
-    setIsGameActive(isGameStarted)
+    if (!isSinglePlayer) {
+      setIsGameActive(isGameStarted)
+    }
   }, [socket])
 
   useEffect(() => {
-    const firstDeck = constructDeck()
-    dealCards(firstDeck)
+    if (isSinglePlayer) {
+      const firstDeck = constructDeck()
+      dealCards(firstDeck)
+    }
   }, [isSinglePlayer])
 
   // useEffect(() => {
@@ -906,6 +957,7 @@ export const Game: React.FC<IProps> = ({
         socket={socket}
         room={room}
         currentDeck={currentDeck}
+        roundText={roundText}
         // getCard={getCard}
         calculateProof={calculateProof}
         isGameActive={isGameActive}

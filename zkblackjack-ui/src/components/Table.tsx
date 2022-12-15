@@ -9,6 +9,7 @@ import {
   BLACKJACK_CONTRACT_ADDRESS,
 } from "../../constants"
 import { useSockets } from "../context/SocketContext"
+import { RoundResult } from "./Game"
 import { getCreate2Address } from "ethers/lib/utils"
 
 interface IProps {
@@ -23,6 +24,7 @@ interface IProps {
   isGameActive?: boolean
   library: ethers.providers.Web3Provider
   getCard?: (val: string[]) => void
+  roundText: RoundResult
   // getWinner: () => void
 }
 
@@ -46,29 +48,29 @@ interface PlayerInfo {
 //   DRAW_ROUND: "draw-round",
 // }
 
-enum LeaderboardActionKind {
-  WIN_ROUND = "win-round",
-  LOSE_ROUND = "lose-round",
-  DRAW_ROUND = "draw-round",
-}
+// enum LeaderboardActionKind {
+//   WIN_ROUND = "win-round",
+//   LOSE_ROUND = "lose-round",
+//   DRAW_ROUND = "draw-round",
+// }
 
-interface LeaderboardAction {
-  type: LeaderboardActionKind
-  payload: string
-}
+// interface LeaderboardAction {
+//   type: LeaderboardActionKind
+//   payload: string
+// }
 
-const reducer = (state: Array<string>, action: LeaderboardAction) => {
-  switch (action.type) {
-    case LeaderboardActionKind.WIN_ROUND:
-      return [...state, action.payload]
-    case LeaderboardActionKind.LOSE_ROUND:
-      return [...state, action.payload]
-    case LeaderboardActionKind.DRAW_ROUND:
-      return [...state, action.payload]
-    default:
-      throw new Error(`Unhandled  action type ${action.type}`)
-  }
-}
+// const reducer = (state: Array<string>, action: LeaderboardAction) => {
+//   switch (action.type) {
+//     case LeaderboardActionKind.WIN_ROUND:
+//       return [...state, action.payload]
+//     case LeaderboardActionKind.LOSE_ROUND:
+//       return [...state, action.payload]
+//     case LeaderboardActionKind.DRAW_ROUND:
+//       return [...state, action.payload]
+//     default:
+//       throw new Error(`Unhandled  action type ${action.type}`)
+//   }
+// }
 
 export const Table: React.FC<IProps> = ({
   account,
@@ -78,6 +80,7 @@ export const Table: React.FC<IProps> = ({
   // socket,
   // getCard,
   currentDeck,
+  roundText,
   getCard,
   isSinglePlayer,
   setIsGameActive,
@@ -85,13 +88,12 @@ export const Table: React.FC<IProps> = ({
   // getWinner,
 }) => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [roundText, dispatch] = useReducer(reducer, [])
   const [playerTwo, setPlayerTwo] = useState("")
   const [playerOne, setPlayerOne] = useState("")
   const { socket, startDeck, cards, deckData } = useSockets()
-  const handleClick = () => {
-    dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
-  }
+  // const handleClick = () => {
+  //   dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
+  // }
 
   const getPlayers = async () => {
     // const signer = library?.getSigner()
@@ -166,7 +168,15 @@ export const Table: React.FC<IProps> = ({
   }
 
   useEffect(() => {
-    getPlayers()
+    if (isSinglePlayer) {
+      setPlayerOne(account)
+    }
+  }, [isSinglePlayer])
+
+  useEffect(() => {
+    if (!isSinglePlayer) {
+      getPlayers()
+    }
     console.log("gotplayers")
   }, [deckData])
 
@@ -174,6 +184,7 @@ export const Table: React.FC<IProps> = ({
   console.log("player2", cards.playerTwoCards)
   // console.log("house", deckData.house.cards!)
   console.log("deckdata in table", deckData)
+  console.log("current deck table", currentDeck)
 
   //TODO try listening socket in this component instead of passing as prop
   if (isSinglePlayer) {
@@ -196,8 +207,8 @@ export const Table: React.FC<IProps> = ({
             layout="fixed"
           />
         </div> */}
-              {deckData.house.cards.length > 0 ? (
-                deckData.house.cards.map((card, index) => {
+              {cards.houseCards.length > 0 ? (
+                cards.houseCards.map((card, index) => {
                   if (index === 0) {
                     return (
                       <div className="-ml-[8rem] mt-0.5 md:-ml-[12rem]">
@@ -297,8 +308,8 @@ export const Table: React.FC<IProps> = ({
             >
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
 
-              {deckData.player1.cards.length > 0 ? (
-                deckData.player1.cards.map((card) => {
+              {cards.playerOneCards.length > 0 ? (
+                cards.playerOneCards.map((card) => {
                   return (
                     <div
                       key={card}
@@ -314,7 +325,7 @@ export const Table: React.FC<IProps> = ({
                   )
                 })
               ) : (
-                <div className="flex relative right-16 w-fit">
+                <div className="flex relative right-12 w-fit">
                   <div className={`   relative left-36 `}>
                     <Image
                       src={"/cards/back.svg"}
@@ -337,9 +348,10 @@ export const Table: React.FC<IProps> = ({
                 </div>
               )}
 
-              {/* <h1 className="relative top-24 right-16  text-white font-poppins text-xl">
-                {account ? truncateEthAddress(account) : "Player 1"}
-              </h1> */}
+              <h1 className="relative top-24 right-16  text-white font-poppins text-xl">
+                {deckData.player1.cards.length > 0 &&
+                  truncateEthAddress(account)}
+              </h1>
             </div>
 
             <div className="flex justify-evenly relative right-8 md:flex-row md:justify-center items-center   md:-mt-12 md:mb-4">
@@ -371,7 +383,7 @@ export const Table: React.FC<IProps> = ({
             <Scoreboard
               isSinglePlayer={isSinglePlayer}
               playerTwo={playerTwo}
-              roundText={roundText} // for each player
+              roundText={roundText}
               playerOne={playerOne}
             />{" "}
           </div>

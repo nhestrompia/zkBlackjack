@@ -1,9 +1,10 @@
 import React, { useEffect } from "react"
 import truncateEthAddress from "truncate-eth-address"
+import { RoundResult } from "./Game"
 
 interface IProps {
   playerOne: string
-  roundText: Array<string>
+  roundText: RoundResult
   playerTwo: string
   isSinglePlayer: boolean
 }
@@ -22,7 +23,7 @@ export const Scoreboard: React.FC<IProps> = ({
     >
       <div
         className={`col-start-1 col-span-1 ${
-          roundText.length > 0 ? "border-b-2 border-b-white" : ""
+          roundText.playerOne.length > 0 ? "border-b-2 border-b-white" : ""
         } ${
           isSinglePlayer ? "" : "border-r-2 border-r-white "
         }border-opacity-20`}
@@ -32,7 +33,7 @@ export const Scoreboard: React.FC<IProps> = ({
         </h1>
         <div className="mt-2">
           {roundText
-            ? roundText.map((round: string, index: number) => {
+            ? roundText.playerOne.map((round: string, index: number) => {
                 return (
                   <h1 className="" key={index}>
                     {round}
