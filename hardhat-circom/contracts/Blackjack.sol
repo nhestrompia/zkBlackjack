@@ -3,6 +3,8 @@ pragma solidity ^0.8.6;
 
 
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+// import "/@openzeppelin/contracts/access/Ownable.sol";
+
 // import "./BlackjackVerifier.sol"
 
 interface IVerifier {

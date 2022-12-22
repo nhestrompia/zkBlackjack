@@ -8,12 +8,30 @@ import { ethers } from "ethers"
 interface IProps {
   account: string
   library: ethers.providers.Web3Provider
+  isGameActive?: boolean
+  setIsGameActive?: (val: boolean) => void
+  isSinglePlayer: boolean
+  setIsSinglePlayer?: (val: boolean) => void
 }
 
-const Room: NextPage<IProps> = ({ account, library }) => {
+const Room: NextPage<IProps> = ({
+  account,
+  library,
+  isGameActive,
+  setIsGameActive,
+  isSinglePlayer,
+  setIsSinglePlayer,
+}) => {
   return (
-    <div className="h-screen">
-      <Game isSinglePlayer={true} account={account} library={library} />
+    <div className="">
+      <Game
+        setIsSinglePlayer={setIsSinglePlayer}
+        isGameActive={isGameActive}
+        setIsGameActive={setIsGameActive}
+        isSinglePlayer={isSinglePlayer}
+        account={account}
+        library={library}
+      />
     </div>
   )
 }

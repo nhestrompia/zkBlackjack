@@ -42,15 +42,15 @@ snarkjs groth16 setup build/${CIRCUIT}.r1cs ptau/powersOfTau28_hez_final_${PTAU}
 
 echo "----- Contribute to the phase 2 of the ceremony -----"
 # Contribute to the phase 2 of the ceremony
-snarkjs zkey contribute build/${CIRCUIT}_0000.zkey build/${CIRCUIT}_final.zkey --name="1st Contributor Name" -v -e="some random text"
+snarkjs zkey contribute build/${CIRCUIT}_0000.zkey build/${CIRCUIT}.zkey --name="1st Contributor Name" -v -e="some random text"
 
 echo "----- Export the verification key -----"
 # Export the verification key
-snarkjs zkey export verificationkey build/${CIRCUIT}_final.zkey build/verification_key.json
+snarkjs zkey export verificationkey build/${CIRCUIT}.zkey build/verification_key.json
 
 echo "----- Generate zk-proof -----"
 # Generate a zk-proof associated to the circuit and the witness. This generates proof.json and public.json
-snarkjs groth16 prove build/${CIRCUIT}_final.zkey build/${CIRCUIT}_js/witness.wtns build/proof.json build/public.json
+snarkjs groth16 prove build/${CIRCUIT}.zkey build/${CIRCUIT}_js/witness.wtns build/proof.json build/public.json
 
 echo "----- Verify the proof -----"
 # Verify the proof
@@ -58,12 +58,33 @@ snarkjs groth16 verify build/verification_key.json build/public.json build/proof
 
 echo "----- Generate Solidity verifier -----"
 # Generate a Solidity verifier that allows verifying proofs on Ethereum blockchain
-snarkjs zkey export solidityverifier build/${CIRCUIT}_final.zkey build/${CIRCUIT}Verifier.sol
+snarkjs zkey export solidityverifier build/${CIRCUIT}.zkey build/${CIRCUIT^}Verifier.sol
 # Update the solidity version in the Solidity verifier
-sed -i 's/0.6.11;/0.8.4;/g' build/${CIRCUIT}Verifier.sol
+sed -i 's/0.6.11;/0.8.6;/g' build/${CIRCUIT^}Verifier.sol
 # Update the contract name in the Solidity verifier
-sed -i "s/contract Verifier/contract ${CIRCUIT^}Verifier/g" build/${CIRCUIT}Verifier.sol
+# sed -i "s/contract Verifier/contract ${CIRCUIT^}Verifier/g" build/${CIRCUIT^}Verifier.sol
 
 echo "----- Generate and print parameters of call -----"
 # Generate and print parameters of call
 snarkjs generatecall build/public.json build/proof.json | tee build/parameters.txt
+
+# Delete the build folder, if it exists
+rm -r -f ./${CIRCUIT}.wasm
+
+# Delete the build folder, if it exists
+rm -r -f ./${CIRCUIT}.zkey
+
+# Delete the build folder, if it exists
+rm -r -f ../contracts/${CIRCUIT^}Verifier.sol
+
+echo "----- Copy the wasm file inside the circuits folder -----"
+# Copy the wasm file inside the circuits folder
+cp build/${CIRCUIT}_js/${CIRCUIT}.wasm ./
+
+echo "----- Copy the zkey file inside the circuits folder -----"
+# Copy the zkey file inside the circuits folder
+cp build/${CIRCUIT}.zkey ./
+
+echo "----- Copy the verifier file inside the contracts folder -----"
+# Copy the verifier file inside the contracts folder
+cp build/${CIRCUIT^}Verifier.sol ../contracts/

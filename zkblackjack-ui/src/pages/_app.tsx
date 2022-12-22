@@ -11,8 +11,9 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   const [library, setLibrary] = useState<ethers.providers.Web3Provider>()
   const [account, setAccount] = useState<string>("")
   const [provider, setProvider] = useState()
-  const [socket, setSocket] = useState<Socket>()
+  // const [socket, setSocket] = useState<Socket>()
   const [isSinglePlayer, setIsSinglePlayer] = useState<boolean>(false)
+  const [isGameActive, setIsGameActive] = useState<boolean>(false)
 
   // useEffect(() => {
   //   const socketInstance = io("http://localhost:3001")
@@ -56,6 +57,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   //   }
   // }, [socket])
 
+  console.log("is game in app", isGameActive)
+
   return (
     <>
       <SocketsProvider>
@@ -73,6 +76,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           account={account}
           isSinglePlayer={isSinglePlayer}
           setIsSinglePlayer={setIsSinglePlayer}
+          isGameActive={isGameActive}
+          setIsGameActive={setIsGameActive}
           // socket={socket}
         />
       </SocketsProvider>

@@ -17,7 +17,7 @@ import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { Modal } from "./Modal"
 import { Table } from "./Table"
-import { constructDeck } from "../utils/constructDeck"
+// import { constructDeck } from "../utils/constructDeck"
 import { useSockets } from "../context/SocketContext"
 import { blackjackCalldata } from "../../zkproof/snarkjsBlackjack"
 import { Ace, Card, Sum } from "../context/SocketContext"
@@ -28,6 +28,9 @@ interface IProps {
   isSinglePlayer?: boolean
   // socket: any
   room?: string
+  isGameActive?: boolean
+  setIsGameActive?: (val: boolean) => void
+  setIsSinglePlayer?: (val: boolean) => void
 }
 
 interface TransactionResponse {
@@ -67,11 +70,11 @@ export const Game: React.FC<IProps> = ({
   library,
   account,
   isSinglePlayer,
-
+  isGameActive,
+  setIsGameActive,
   // socket,
   room,
 }) => {
-  const [isGameActive, setIsGameActive] = useState<boolean>(false)
   // const [isStandSingle, setIsStandSingle] = useState(false)
   // const [roundText, dispatch] = useReducer(reducer, [])
   const [currentDeck, setCurrentDeck] = useState<string[]>([])
@@ -115,7 +118,7 @@ export const Game: React.FC<IProps> = ({
     if (effectRan.current === false) {
       // setRoundText([])
       setIsCanWithdraw(false)
-      setIsGameActive(false)
+      // setIsGameActive(true)
       setIsGameEnded(false)
       // setPlayerOneCards([])
       // setPlayerTwoCards([])
@@ -245,7 +248,7 @@ export const Game: React.FC<IProps> = ({
           )
           // setRoundText(["Wait for", `Evaluation`])
         }
-        setIsGameActive(false)
+        // setIsGameActive(false)
         setLoading(true)
       }, 2000)
     }
@@ -255,9 +258,9 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     console.log("is game", isGameActive)
-    if (isGameActive === false) {
+    if (isGameEnded) {
       setCards({ playerOneCards: [], playerTwoCards: [], houseCards: [] })
-    } else if (isGameActive) {
+    } else if (!isGameEnded) {
       // dealCards(currentDeck)
       // const data = {
       //   room: room,
@@ -268,7 +271,7 @@ export const Game: React.FC<IProps> = ({
       // }
       // socket.emit("card_dealt", data)
     }
-  }, [isGameActive])
+  }, [isGameEnded])
 
   const unlockBet = async (playerAddress: string) => {
     try {
@@ -366,7 +369,7 @@ export const Game: React.FC<IProps> = ({
           calldata.c,
           calldata.Input
         )
-      const confirmation = await library.waitForTransaction(result.hash)
+      // getWinner("1",calldata.Input[0],calldata.Input[1])
       console.log("result", result)
     } catch (error) {
       console.error(error)
@@ -414,6 +417,7 @@ export const Game: React.FC<IProps> = ({
       deck[randomNumber] = currentCard ?? ""
     }
     setCurrentDeck(deck)
+    console.log("deck constructed", deck)
     return deck
   }
 
@@ -455,10 +459,14 @@ export const Game: React.FC<IProps> = ({
   }
 
   useEffect(() => {
-    if (deckData.deckCards.length <= 4) {
-      setIsGameActive(false)
-    } else {
-      console.log("deck data in game", deckData)
+    if (isSinglePlayer) {
+      if (currentDeck.length <= 6) {
+        // setIsGameActive(false)
+      } else {
+        console.log("deck data in game", currentDeck)
+      }
+    } else if (currentDeck.length <= 4) {
+      // setIsGameActive(false)
     }
     // const data = {
     //   room: room,
@@ -472,13 +480,15 @@ export const Game: React.FC<IProps> = ({
   useEffect(() => {
     // setCurrentDeck(startDeck)
     if (!isSinglePlayer) {
-      setIsGameActive(isGameStarted)
+      // setIsGameActive(isGameStarted)
     }
   }, [socket])
 
   useEffect(() => {
-    if (isSinglePlayer) {
+    console.log("isSingle useEffect")
+    if (isSinglePlayer && isGameActive) {
       const firstDeck = constructDeck()
+      console.log("first deck", firstDeck)
       dealCards(firstDeck)
     }
   }, [isSinglePlayer])
@@ -637,8 +647,8 @@ export const Game: React.FC<IProps> = ({
   }
 
   // const getWinner = () => {
-  //   setIsStandSingle(true)
-  //   if (suplayerOneSum > 21) {
+  //   // setIsStandSingle(true)
+  //   if (sums.playerOneSum > 21) {
   //     setRoundText(["You", "Lost!"])
   //     setScore((prevState) => prevState! - 1)
   //   } else if (houseSum > 21) {
@@ -669,6 +679,58 @@ export const Game: React.FC<IProps> = ({
   //   }
   // }
 
+  const getWinner = (player: string, result: number, playerSum: number) => {
+    if (player === "1") {
+      if (result === 1) {
+        setRoundText((prevState) => ({
+          ...prevState,
+          playerOne: [...prevState.playerOne, "Win"],
+        }))
+      } else if (result === 0) {
+        setRoundText((prevState) => ({
+          ...prevState,
+          playerOne: [...prevState.playerOne, "Lose"],
+        }))
+      } else if (result === 2) {
+        if (playerSum > 21) {
+          setRoundText((prevState) => ({
+            ...prevState,
+            playerOne: [...prevState.playerOne, "Lose"],
+          }))
+        } else {
+          setRoundText((prevState) => ({
+            ...prevState,
+            playerOne: [...prevState.playerOne, "Draw"],
+          }))
+        }
+      }
+    } else {
+      if (result === 1) {
+        setRoundText((prevState) => ({
+          ...prevState,
+          playerTwo: [...prevState.playerTwo, "Win"],
+        }))
+      } else if (result === 0) {
+        setRoundText((prevState) => ({
+          ...prevState,
+          playerTwo: [...prevState.playerTwo, "Lose"],
+        }))
+      } else if (result === 2) {
+        if (playerSum > 21) {
+          setRoundText((prevState) => ({
+            ...prevState,
+            playerTwo: [...prevState.playerTwo, "Lose"],
+          }))
+        } else {
+          setRoundText((prevState) => ({
+            ...prevState,
+            playerTwo: [...prevState.playerTwo, "Draw"],
+          }))
+        }
+      }
+    }
+  }
+
   const getValue = (card: string) => {
     const data = card?.split("-")
     const value = data[0]
@@ -682,44 +744,6 @@ export const Game: React.FC<IProps> = ({
       return 10
     } else {
       return parseInt(value!)
-    }
-  }
-
-  const startGame = async () => {
-    try {
-      const signer = library?.getSigner()
-
-      const blackjackContract = new Contract(
-        BLACKJACK_CONTRACT_ADDRESS,
-        BLACKJACK_CONTRACT_ABI,
-        signer
-      )
-
-      const tx: TransactionResponse = await toast.promise(
-        blackjackContract.startGame({
-          value: ethers.utils.parseEther("0.01"),
-        }),
-
-        {
-          pending: "Sending transaction...",
-          success: "Starting the game",
-          error: "Something went wrong 🤯",
-        }
-      )
-
-      setLoading(true)
-
-      const confirmation = await library.waitForTransaction(tx.hash)
-
-      setLoading(false)
-      const tempDeck = constructDeck()
-      setScore(0)
-      setIsGameActive(true)
-      setIsCanWithdraw(false)
-
-      // dealCards(tempDeck)
-    } catch (err) {
-      console.error(err)
     }
   }
 
@@ -961,7 +985,7 @@ export const Game: React.FC<IProps> = ({
         // getCard={getCard}
         calculateProof={calculateProof}
         isGameActive={isGameActive}
-        setIsGameActive={setIsGameActive}
+        setIsGameActive={setIsGameActive!}
         // getWinner={getWinner}
       />
     </div>

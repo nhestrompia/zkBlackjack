@@ -189,9 +189,9 @@ export const Table: React.FC<IProps> = ({
   //TODO try listening socket in this component instead of passing as prop
   if (isSinglePlayer) {
     return (
-      <div className="   w-full  ">
+      <div className="   w-fit  mt-12 ml-4 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
-        <div className="grid grid-cols-3 grid-rows-2 justify-center  items-center   ">
+        <div className="grid grid-cols-3 grid-rows-2 justify-center h-screen  items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  md:gap-8 md:mt-6 md:mb-4">
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
@@ -387,7 +387,7 @@ export const Table: React.FC<IProps> = ({
               playerOne={playerOne}
             />{" "}
           </div>
-          <div className="col-start-3 row-start-1 flex ml-12 mt-6 flex-col items-center  ">
+          <div className="col-start-3 row-start-1 flex ml-24 mt-6 flex-col items-center  ">
             <button
               onClick={stand}
               className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"
@@ -903,10 +903,10 @@ export const Table: React.FC<IProps> = ({
               playerOne={playerOne}
             />{" "}
           </div>
-          <div className="col-start-3 row-start-1 flex ml-12 mt-6 flex-col items-center  ">
+          <div className="col-start-3  row-start-1 flex ml-12 mt-6 flex-col items-center  ">
             <button
               onClick={stand}
-              className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"
+              className="p-4 mb-4  hover:scale-110 transition duration-300 ease-in-out"
             >
               <Image
                 src={"/stand.svg"}

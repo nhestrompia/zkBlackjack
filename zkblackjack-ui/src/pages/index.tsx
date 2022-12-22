@@ -24,6 +24,8 @@ interface IProps {
   socket: any
   setIsSinglePlayer: (val: boolean) => void
   isSinglePlayer: boolean
+  isGameActive: boolean
+  setIsGameActive: (val: boolean) => void
 }
 
 interface TransactionResponse {
@@ -35,6 +37,8 @@ const Home: NextPage<IProps> = ({
   account,
   isSinglePlayer,
   setIsSinglePlayer,
+  isGameActive,
+  setIsGameActive,
 }) => {
   // const [library, setLibrary] = useState<ethers.providers.Web3Provider>()
   // const [account, setAccount] = useState<string>("")
@@ -95,6 +99,10 @@ const Home: NextPage<IProps> = ({
   //   return deck
   // }
 
+  useEffect(() => {
+    setIsGameActive(false)
+  }, [])
+
   const joinRoom = async (data: any) => {
     const signer = library?.getSigner()
 
@@ -142,6 +150,7 @@ const Home: NextPage<IProps> = ({
         // houseSums: sums.houseSum,
       }
       socket.emit("join_room", sendData)
+      setIsGameActive(true)
       router.push(`/room/${data}`)
     }
   }
@@ -175,8 +184,10 @@ const Home: NextPage<IProps> = ({
 
       console.log("game room", gameRoom)
 
-      router.push(`/room/${gameRoom}`)
       socket.emit("create_room", gameRoom.toString())
+      setIsGameActive(true)
+
+      router.push(`/room/${gameRoom}`)
     } catch (err) {
       console.error(err)
     }
@@ -209,6 +220,7 @@ const Home: NextPage<IProps> = ({
       const confirmation = await library.waitForTransaction(createGame.hash)
       setIsSinglePlayer(true)
       console.log("game room", gameRoom)
+      setIsGameActive(true)
 
       router.push(`/room/${gameRoom}`)
     } catch (err) {
@@ -256,21 +268,8 @@ const Home: NextPage<IProps> = ({
             </div>
           </div> */}
         </nav>
-        {isGameStarted ? (
+        {isGameActive ? (
           <div className="flex justify-center  relative top-64 left-0 z-20 ">
-            {" "}
-            {/* <Game
-              isSinglePlayer={isSinglePlayer}
-              library={library!}
-              account={account}
-            /> */}
-            {/* <Image
-              src={"/loader.svg"}
-              width={64}
-              height={64}
-              layout="fixed"
-              className=""
-            /> */}
             {/* <svg
               width="24"
               height="24"
@@ -296,7 +295,7 @@ const Home: NextPage<IProps> = ({
             </svg>
           </div>
         ) : (
-          <div className="grid items-center justify-center grid-cols-3 mt-20 lg:-mt-4">
+          <div className="grid items-center justify-center grid-cols-3 mt-20 lg:mt-8">
             <div className="flex items-center justify-center col-start-1 mx-auto w-fit">
               <button
                 onClick={startSinglePlayer}
@@ -352,7 +351,7 @@ const Home: NextPage<IProps> = ({
           </div>
         )}
       </main>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={4000}
         hideProgressBar
@@ -363,7 +362,7 @@ const Home: NextPage<IProps> = ({
         draggable
         pauseOnHover
         theme="dark"
-      />
+      /> */}
     </div>
   )
 }
