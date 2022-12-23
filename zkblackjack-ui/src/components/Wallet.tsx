@@ -2,7 +2,7 @@ import React, { useEffect } from "react"
 import Web3Modal from "web3modal"
 import truncateEthAddress from "truncate-eth-address"
 import { BigNumber, Contract, ethers, providers, utils } from "ethers"
-import { NextRouter, useRouter } from "next/router"
+import { useRouter } from "next/router"
 
 import WalletConnect from "@walletconnect/web3-provider"
 

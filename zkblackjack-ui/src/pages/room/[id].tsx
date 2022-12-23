@@ -38,8 +38,8 @@ const Room: NextPage<IProps> = ({ account, library, socket }) => {
   // };
 
   return (
-    <div className="h-screen">
-      <Game socket={socket} room={room} account={account} library={library} />
+    <div className="">
+      <Game room={room} account={account} library={library} />
     </div>
   )
 }

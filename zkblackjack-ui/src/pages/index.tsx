@@ -6,6 +6,7 @@ import io from "socket.io-client";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { constructDeck } from "../utils/constructDeck";
 import {
   BLACKJACK_CONTRACT_ABI,
@@ -116,7 +117,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
       room !== "" &&
       roomCheck[2] !== "0x0000000000000000000000000000000000000000"
     ) {
-      const joinGame: TransactionResponse = await await toast.promise(
+      const joinGame: TransactionResponse = await toast.promise(
         blackjackContract.joinGame(room, {
           value: ethers.utils.parseEther("0.01"),
         }),
@@ -349,7 +350,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
           </div>
         )}
       </main>
-      {/* <ToastContainer
+      <ToastContainer
         position="top-center"
         autoClose={4000}
         hideProgressBar
@@ -360,7 +361,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
         draggable
         pauseOnHover
         theme="dark"
-      /> */}
+      />
     </div>
   );
 };
