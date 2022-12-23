@@ -762,7 +762,17 @@ export const Game: React.FC<IProps> = ({
         // })
       }
     } else {
+      toast.error("No more cards left. This is the final round!", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+      })
       setIsGameActive(false)
+      setIsGameEnded(true)
     }
   }
 
@@ -1191,7 +1201,7 @@ export const Game: React.FC<IProps> = ({
     //   />
     // </>
 
-    <div>
+    <div className="h-fit">
       <Table
         isGameEnded={isGameEnded}
         isSinglePlayer={true}

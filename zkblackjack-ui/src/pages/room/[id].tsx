@@ -38,7 +38,7 @@ const Room: NextPage<IProps> = ({ account, library, socket }) => {
   // };
 
   return (
-    <div className="">
+    <div className="h-screen w-fit overflow-hidden">
       <Game room={room} account={account} library={library} />
     </div>
   )

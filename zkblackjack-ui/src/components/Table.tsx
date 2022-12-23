@@ -195,9 +195,9 @@ export const Table: React.FC<IProps> = ({
 
   if (isSinglePlayer) {
     return (
-      <div className="   w-fit  mt-12 ml-4 ">
+      <div className="   w-fit h-screen mt-2 ml-4 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
-        <div className="grid grid-cols-3  grid-rows-2 justify-center h-screen  items-center   ">
+        <div className="grid grid-cols-3  grid-rows-2 justify-center   items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  md:gap-8 md:mt-6 md:mb-4">
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
@@ -286,8 +286,8 @@ export const Table: React.FC<IProps> = ({
               />
             </div>
           </div>
-          <div className="col-start-1 col-span-3 bottom-12 row-start-2 flex justify-evenly relative ">
-            <div className="flex justify-evenly md:flex-row md:justify-center items-center   md:-mt-12 md:mb-4">
+          <div className="col-start-1 col-span-3 bottom-14 row-start-2 flex justify-evenly relative ">
+            <div className="flex justify-evenly md:flex-row md:justify-center items-center    md:mb-20">
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               <div className="flex relative left-5">
                 <div className="relative left-14">
@@ -313,7 +313,7 @@ export const Table: React.FC<IProps> = ({
             </div>
 
             <div
-              className={`flex justify-evenly max-w-fit relative right-10 md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
+              className={`flex justify-evenly max-w-fit relative right-10 md:flex-row md:justify-center items-center  md:gap-8  md:mb-8`}
             >
               <div className="w-28 h-28 absolute border-2  rounded-full"></div>
 
@@ -369,7 +369,7 @@ export const Table: React.FC<IProps> = ({
               </h1>
             </div>
 
-            <div className="flex justify-evenly relative right-8 md:flex-row md:justify-center items-center   md:-mt-12 md:mb-4">
+            <div className="flex justify-evenly relative right-8 md:flex-row md:justify-center items-center    md:mb-20">
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               <div className="flex relative left-2">
                 <div className="relative left-14">
@@ -416,7 +416,7 @@ export const Table: React.FC<IProps> = ({
                   layout="fixed"
                 />
               </button>
-              <button onClick={withdrawSafe}>Start</button>
+              {/* <button onClick={withdrawSafe}>Start</button> */}
               <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
                 <Image
                   onClick={() => getCard!(currentDeck!)}
@@ -448,7 +448,7 @@ export const Table: React.FC<IProps> = ({
     )
   } else {
     return (
-      <div className="   w-full  ">
+      <div className="   w-full h-screen mt-6 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
         <div className="grid grid-cols-3 grid-rows-2 justify-center  items-center h-full">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
