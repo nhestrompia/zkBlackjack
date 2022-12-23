@@ -1,56 +1,54 @@
-import type { NextPage } from "next"
-import Head from "next/head"
-import { useState, useEffect, useContext } from "react"
-import { Wallet } from "../components/Wallet"
-import io from "socket.io-client"
-import Image from "next/image"
-import { useRouter } from "next/router"
-import { toast, ToastContainer } from "react-toastify"
-import { constructDeck } from "../utils/constructDeck"
+import type { NextPage } from "next";
+import Head from "next/head";
+import { useState, useEffect, useContext } from "react";
+import { Wallet } from "../components/Wallet";
+import io from "socket.io-client";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { toast, ToastContainer } from "react-toastify";
+import { constructDeck } from "../utils/constructDeck";
 import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,
-} from "../../constants"
+} from "../../constants";
 
-import { Game } from "../components/Game"
-import { BigNumber, Contract, ethers, providers, utils } from "ethers"
-import Rules from "../components/Rules"
-import { Modal } from "../components/Modal"
-import { useSockets } from "../context/SocketContext"
+import { Game } from "../components/Game";
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
+import Rules from "../components/Rules";
+import { Modal } from "../components/Modal";
+import { useSockets } from "../context/SocketContext";
+import { boolean } from "zod";
 
 interface IProps {
-  library: ethers.providers.Web3Provider
-  account: string
-  socket: any
-  setIsSinglePlayer: (val: boolean) => void
-  isSinglePlayer: boolean
-  isGameActive: boolean
-  setIsGameActive: (val: boolean) => void
+  library: ethers.providers.Web3Provider;
+  account: string;
 }
 
 interface TransactionResponse {
-  hash: string
+  hash: string;
 }
 
-const Home: NextPage<IProps> = ({
-  library,
-  account,
-  isSinglePlayer,
-  setIsSinglePlayer,
-  isGameActive,
-  setIsGameActive,
-}) => {
+const Home: NextPage<IProps> = ({ library, account }) => {
   // const [library, setLibrary] = useState<ethers.providers.Web3Provider>()
   // const [account, setAccount] = useState<string>("")
   // const [provider, setProvider] = useState()
-  const [isJoin, setIsJoin] = useState<boolean>(false)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isJoin, setIsJoin] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
-  const [room, setRoom] = useState("")
-  const router = useRouter()
+  const [room, setRoom] = useState("");
+  const router = useRouter();
 
-  const { socket, isGameStarted, dealCards, startDeck, cards, sums, aces } =
-    useSockets()
+  const {
+    socket,
+    dealCards,
+    startDeck,
+    isGameActive,
+    setIsGameActive,
+    setIsSinglePlayer,
+    cards,
+    sums,
+    aces,
+  } = useSockets();
   // const socket = useContext(SocketContext)
 
   // Messages States
@@ -100,19 +98,19 @@ const Home: NextPage<IProps> = ({
   // }
 
   useEffect(() => {
-    setIsGameActive(false)
-  }, [])
+    setIsGameActive(false);
+  }, []);
 
   const joinRoom = async (data: any) => {
-    const signer = library?.getSigner()
+    const signer = library?.getSigner();
 
     const blackjackContract = new Contract(
       BLACKJACK_CONTRACT_ADDRESS,
       BLACKJACK_CONTRACT_ABI,
       signer
-    )
+    );
 
-    const roomCheck = await blackjackContract.games(parseInt(room))
+    const roomCheck = await blackjackContract.games(parseInt(room));
 
     if (
       room !== "" &&
@@ -127,8 +125,8 @@ const Home: NextPage<IProps> = ({
           success: "Joining to room",
           error: "Something went wrong 🤯",
         }
-      )
-      const confirmation = await library.waitForTransaction(joinGame.hash)
+      );
+      const confirmation = await library.waitForTransaction(joinGame.hash);
 
       // const deck = constructDeck()
       // await dealCards(deck)
@@ -148,25 +146,25 @@ const Home: NextPage<IProps> = ({
         // playerOneSums: sums.playerOneSum,
         // playerTwoSums: sums.playerTwoSum,
         // houseSums: sums.houseSum,
-      }
-      socket.emit("join_room", sendData)
-      setIsGameActive(true)
-      router.push(`/room/${data}`)
+      };
+      socket.emit("join_room", sendData);
+      setIsGameActive(true);
+      router.push(`/room/${data}`);
     }
-  }
+  };
 
   //TODO put construct deck and deal cards here and emit it to backend in joinroom
 
   const createRoom = async () => {
     try {
-      const signer = library?.getSigner()
+      const signer = library?.getSigner();
 
       const blackjackContract = new Contract(
         BLACKJACK_CONTRACT_ADDRESS,
         BLACKJACK_CONTRACT_ABI,
         signer
-      )
-      const gameRoom = await blackjackContract.gameId()
+      );
+      const gameRoom = await blackjackContract.gameId();
 
       const createGame: TransactionResponse = await toast.promise(
         blackjackContract.startMultiplayerGame({
@@ -178,32 +176,32 @@ const Home: NextPage<IProps> = ({
           success: "Starting the game",
           error: "Something went wrong 🤯",
         }
-      )
+      );
 
-      const confirmation = await library.waitForTransaction(createGame.hash)
+      const confirmation = await library.waitForTransaction(createGame.hash);
 
-      console.log("game room", gameRoom)
+      console.log("game room", gameRoom);
 
-      socket.emit("create_room", gameRoom.toString())
-      setIsGameActive(true)
+      socket.emit("create_room", gameRoom.toString());
+      setIsGameActive(true);
 
-      router.push(`/room/${gameRoom}`)
+      router.push(`/room/${gameRoom}`);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const startSinglePlayer = async () => {
     try {
-      const signer = library?.getSigner()
+      const signer = library?.getSigner();
 
       const blackjackContract = new Contract(
         BLACKJACK_CONTRACT_ADDRESS,
         BLACKJACK_CONTRACT_ABI,
         signer
-      )
+      );
 
-      const gameRoom = await blackjackContract.gameId()
+      const gameRoom = await blackjackContract.gameId();
 
       const createGame: TransactionResponse = await toast.promise(
         blackjackContract.startSinglePlayerGame({
@@ -215,22 +213,22 @@ const Home: NextPage<IProps> = ({
           success: "Starting the game",
           error: "Something went wrong 🤯",
         }
-      )
+      );
 
-      const confirmation = await library.waitForTransaction(createGame.hash)
-      setIsSinglePlayer(true)
-      console.log("game room", gameRoom)
-      setIsGameActive(true)
+      const confirmation = await library.waitForTransaction(createGame.hash);
+      setIsSinglePlayer(true);
+      console.log("game room", gameRoom);
+      setIsGameActive(true);
 
-      router.push(`/room/${gameRoom}`)
+      router.push(`/room/${gameRoom}`);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const sendMessage = () => {
     // socket.emit("send_message", { message, room })
-  }
+  };
 
   // const createRoom = () => {
   //   router.push()
@@ -326,8 +324,8 @@ const Home: NextPage<IProps> = ({
               </button>
               <button
                 onClick={() => {
-                  setIsJoin(true)
-                  setIsModalOpen(true)
+                  setIsJoin(true);
+                  setIsModalOpen(true);
                 }}
                 className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
@@ -364,7 +362,7 @@ const Home: NextPage<IProps> = ({
         theme="dark"
       /> */}
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

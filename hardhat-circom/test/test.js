@@ -203,35 +203,35 @@ describe("Blackjack contract", function () {
           await loadFixture(deployContractFixture)
 
         const input = {
-          sumPlayer: 0,
-          sumHouse: 0,
+          sumPlayer: 15,
+          sumHouse: 15,
         }
 
-        const testData = [
-          [
-            "0x122f6fa1c08218ef6d95d06354fddf2e35e18b67441117841ead0f89291096b2",
-            "0x2c81e9979d5c12a88e6b8a34b45a00d38bb656c0c64b5caee34ec47101c61376",
-          ],
-          [
-            [
-              "0x139c014d66e594ea15abc81f75f3719f66919c6df9edce96eaadeebd549e82ff",
-              "0x0b4a75bc40cdd41e3db7c2d8a88ea31b463d0255055e82655516fbf00c31dbde",
-            ],
-            [
-              "0x02e50251d1d253186e0a2473d7e9451cbee3f2a4461bbf2a58af365d9600caba",
-              "0x163f23279361327b4fcb9885daf7aa91ccff110884af31456c36851799dd3829",
-            ],
-          ],
-          [
-            "0x2358e288f9917a9acddc40ff0726510a21d1d5780c0162430cc820532a50e997",
-            "0x2d65f6dc94f3a0b1ec2fa12a5018a1dd6e791dbab6dd186abd072503f0cabe80",
-          ],
-          [
-            "0x0000000000000000000000000000000000000000000000000000000000000001",
-            "0x0000000000000000000000000000000000000000000000000000000000000015",
-            "0x0000000000000000000000000000000000000000000000000000000000000015",
-          ],
-        ]
+        // const testData = [
+        //   [
+        //     "0x122f6fa1c08218ef6d95d06354fddf2e35e18b67441117841ead0f89291096b2",
+        //     "0x2c81e9979d5c12a88e6b8a34b45a00d38bb656c0c64b5caee34ec47101c61376",
+        //   ],
+        //   [
+        //     [
+        //       "0x139c014d66e594ea15abc81f75f3719f66919c6df9edce96eaadeebd549e82ff",
+        //       "0x0b4a75bc40cdd41e3db7c2d8a88ea31b463d0255055e82655516fbf00c31dbde",
+        //     ],
+        //     [
+        //       "0x02e50251d1d253186e0a2473d7e9451cbee3f2a4461bbf2a58af365d9600caba",
+        //       "0x163f23279361327b4fcb9885daf7aa91ccff110884af31456c36851799dd3829",
+        //     ],
+        //   ],
+        //   [
+        //     "0x2358e288f9917a9acddc40ff0726510a21d1d5780c0162430cc820532a50e997",
+        //     "0x2d65f6dc94f3a0b1ec2fa12a5018a1dd6e791dbab6dd186abd072503f0cabe80",
+        //   ],
+        //   [
+        //     "0x0000000000000000000000000000000000000000000000000000000000000001",
+        //     "0x0000000000000000000000000000000000000000000000000000000000000015",
+        //     "0x0000000000000000000000000000000000000000000000000000000000000015",
+        //   ],
+        // ]
 
         const dataResult = await exportCallDataGroth16(
           input,
@@ -243,10 +243,10 @@ describe("Blackjack contract", function () {
 
         // Call the function.
         const result = await blackjack.verifyRoundWin(
-          testData[0],
-          testData[1],
-          testData[2],
-          testData[3]
+          dataResult.a,
+          dataResult.b,
+          dataResult.c,
+          dataResult.Input
         )
 
         console.log("result", result)

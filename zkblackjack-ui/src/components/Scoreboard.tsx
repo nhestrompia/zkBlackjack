@@ -1,12 +1,12 @@
-import React, { useEffect } from "react"
-import truncateEthAddress from "truncate-eth-address"
-import { RoundResult } from "./Game"
+import React, { useEffect } from "react";
+import truncateEthAddress from "truncate-eth-address";
+import { RoundResult } from "./Game";
 
 interface IProps {
-  playerOne: string
-  roundText: RoundResult
-  playerTwo: string
-  isSinglePlayer: boolean
+  playerOne: string;
+  roundText: RoundResult;
+  playerTwo: string;
+  isSinglePlayer: boolean;
 }
 
 export const Scoreboard: React.FC<IProps> = ({
@@ -38,7 +38,7 @@ export const Scoreboard: React.FC<IProps> = ({
                   <h1 className="" key={index}>
                     {round}
                   </h1>
-                )
+                );
               })
             : ""}
         </div>
@@ -48,8 +48,19 @@ export const Scoreboard: React.FC<IProps> = ({
           <h1 className="border-b-2 border-b-white pb-2 border-opacity-20">
             {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
           </h1>
+          <div className="mt-2">
+            {roundText
+              ? roundText.playerTwo.map((round: string, index: number) => {
+                  return (
+                    <h1 className="" key={index}>
+                      {round}
+                    </h1>
+                  );
+                })
+              : ""}
+          </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};

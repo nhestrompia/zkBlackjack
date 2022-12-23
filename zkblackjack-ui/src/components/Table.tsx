@@ -1,45 +1,44 @@
-import Image from "next/image"
-import React, { useState, useReducer, useEffect } from "react"
-import { Scoreboard } from "./Scoreboard"
-import { ShareModal } from "./ShareModal"
-import truncateEthAddress from "truncate-eth-address"
-import { BigNumber, Contract, ethers, providers, utils } from "ethers"
+import Image from "next/image";
+import React, { useState, useReducer, useEffect } from "react";
+import { Scoreboard } from "./Scoreboard";
+import { ShareModal } from "./ShareModal";
+import truncateEthAddress from "truncate-eth-address";
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,
-} from "../../constants"
-import { useSockets } from "../context/SocketContext"
-import { RoundResult } from "./Game"
-import { getCreate2Address } from "ethers/lib/utils"
+} from "../../constants";
+import { useSockets } from "../context/SocketContext";
+import { RoundResult } from "./Game";
+import { getCreate2Address } from "ethers/lib/utils";
 
 interface IProps {
-  account: string
-  socket: any
-  room?: string
-  isSinglePlayer: boolean
-  currentDeck?: string[]
-  calculateProof: (val: string) => void
+  account: string;
+  socket: any;
+  room?: string;
+  isSinglePlayer: boolean;
+  currentDeck?: string[];
+  calculateProof: (val: string) => void;
   // getCard: (val: string[]) => void
-  setIsGameActive: (val: boolean) => void
-  isGameActive?: boolean
-  library: ethers.providers.Web3Provider
-  getCard?: (val: string[]) => void
-  roundText: RoundResult
+
+  library: ethers.providers.Web3Provider;
+  getCard?: (val: string[]) => void;
+  roundText: RoundResult;
   // getWinner: () => void
 }
 
 interface RoomInfo {
-  room: string
-  deckCards: string[]
-  house: PlayerInfo
-  player1: PlayerInfo
-  player2: PlayerInfo
+  room: string;
+  deckCards: string[];
+  house: PlayerInfo;
+  player1: PlayerInfo;
+  player2: PlayerInfo;
 }
 
 interface PlayerInfo {
-  cards: string[]
-  aces: number
-  sum: number
+  cards: string[];
+  aces: number;
+  sum: number;
 }
 
 // const ACTIONS = {
@@ -83,14 +82,13 @@ export const Table: React.FC<IProps> = ({
   roundText,
   getCard,
   isSinglePlayer,
-  setIsGameActive,
-  isGameActive,
   // getWinner,
 }) => {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [playerTwo, setPlayerTwo] = useState("")
-  const [playerOne, setPlayerOne] = useState("")
-  const { socket, startDeck, cards, deckData } = useSockets()
+  const [loading, setLoading] = useState<boolean>(false);
+  const [playerTwo, setPlayerTwo] = useState("");
+  const [playerOne, setPlayerOne] = useState("");
+  const { socket, startDeck, cards, deckData, isGameActive, setIsGameActive } =
+    useSockets();
   // const handleClick = () => {
   //   dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
   // }
@@ -102,96 +100,91 @@ export const Table: React.FC<IProps> = ({
       BLACKJACK_CONTRACT_ADDRESS,
       BLACKJACK_CONTRACT_ABI,
       library
-    )
+    );
 
-    const roomCheck = await blackjackContract.games(parseInt(room!))
+    const roomCheck = await blackjackContract.games(parseInt(room!));
 
-    setPlayerOne(roomCheck[2])
-    setPlayerTwo(roomCheck[3])
-  }
+    setPlayerOne(roomCheck[2]);
+    setPlayerTwo(roomCheck[3]);
+  };
 
-  console.log("playerone address", playerOne)
-  console.log("playerwto address", playerTwo)
+  console.log("playerone address", playerOne);
+  console.log("playerwto address", playerTwo);
 
   const hitMe = () => {
-    let playerNumber: string
+    let playerNumber: string;
     if (account == playerTwo) {
-      playerNumber = "2"
+      playerNumber = "2";
     } else {
-      playerNumber = "1"
+      playerNumber = "1";
     }
 
     const sendData = {
       deck: deckData.deckCards,
       player: playerNumber,
       room: room,
-    }
+    };
 
-    socket.emit("hit_me", sendData)
-  }
+    socket.emit("hit_me", sendData);
+  };
 
   const withdrawSafe = async () => {
-    const signer = library?.getSigner()
+    const signer = library?.getSigner();
 
     const blackjackContract = new Contract(
       BLACKJACK_CONTRACT_ADDRESS,
       BLACKJACK_CONTRACT_ABI,
       signer
-    )
+    );
 
     const tx = await blackjackContract.withdrawSafe(
       ethers.utils.parseEther("0.07")
-    )
-  }
+    );
+  };
   const checkVerifier = async () => {
-    const signer = library?.getSigner()
+    const signer = library?.getSigner();
 
     const blackjackContract = new Contract(
       BLACKJACK_CONTRACT_ADDRESS,
       BLACKJACK_CONTRACT_ABI,
       signer
-    )
+    );
 
-    const tx = await blackjackContract.verifierAddress()
-    console.log("verifier addreesss", tx)
-  }
+    const tx = await blackjackContract.verifierAddress();
+    console.log("verifier addreesss", tx);
+  };
 
   const stand = async () => {
-    let playerNumber: string
+    let playerNumber: string;
     if (account == playerTwo) {
-      playerNumber = "2"
+      playerNumber = "2";
     } else {
-      playerNumber = "1"
+      playerNumber = "1";
     }
 
-    await calculateProof(playerNumber)
-  }
-
-  useEffect(() => {
-    if (isSinglePlayer) {
-      setPlayerOne(account)
-    }
-  }, [isSinglePlayer])
+    await calculateProof(playerNumber);
+  };
 
   useEffect(() => {
     if (!isSinglePlayer) {
-      getPlayers()
+      getPlayers();
+    } else {
+      setPlayerOne(account);
     }
-    console.log("gotplayers")
-  }, [deckData])
+    console.log("gotplayers");
+  }, [deckData, isSinglePlayer]);
 
-  console.log("player1", cards.playerOneCards)
-  console.log("player2", cards.playerTwoCards)
-  // console.log("house", deckData.house.cards!)
-  console.log("deckdata in table", deckData)
-  console.log("current deck table", currentDeck)
+  console.log("player1", cards.playerOneCards);
+  console.log("player2", cards.playerTwoCards);
+  console.log("house", cards.houseCards!);
+  console.log("deckdata in table", deckData);
+  console.log("current deck table", currentDeck);
 
-  //TODO try listening socket in this component instead of passing as prop
   if (isSinglePlayer) {
     return (
       <div className="   w-fit  mt-12 ml-4 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
-        <div className="grid grid-cols-3 grid-rows-2 justify-center h-screen  items-center   ">
+        <div className="grid grid-cols-3  grid-rows-2 justify-center h-screen  items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  md:gap-8 md:mt-6 md:mb-4">
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
@@ -211,18 +204,21 @@ export const Table: React.FC<IProps> = ({
                 cards.houseCards.map((card, index) => {
                   if (index === 0) {
                     return (
-                      <div className="-ml-[8rem] mt-0.5 md:-ml-[12rem]">
+                      <div
+                        className={` 
+                        flex   `}
+                      >
                         <Image
-                          src={deckData.house.cards[0]!}
+                          src={card}
                           width={135}
                           height={140}
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   } else {
                     return (
-                      <div className="z-10">
+                      <div className="-ml-[8rem] md:-ml-[8rem]">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -230,7 +226,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   }
                 })
               ) : (
@@ -277,7 +273,7 @@ export const Table: React.FC<IProps> = ({
               />
             </div>
           </div>
-          <div className="col-start-1 col-span-3 bottom-32 row-start-2 flex justify-evenly relative ">
+          <div className="col-start-1 col-span-3 bottom-12 row-start-2 flex justify-evenly relative ">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center   md:-mt-12 md:mb-4">
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               <div className="flex relative left-5">
@@ -304,25 +300,28 @@ export const Table: React.FC<IProps> = ({
             </div>
 
             <div
-              className={`flex justify-evenly max-w-fit relative right-10  md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
+              className={`flex justify-evenly max-w-fit relative right-6  md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
             >
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
 
               {cards.playerOneCards.length > 0 ? (
-                cards.playerOneCards.map((card) => {
+                cards.playerOneCards.map((card, index) => {
                   return (
                     <div
-                      key={card}
-                      className="-ml-[8rem] mt-0.5 md:-ml-[12rem]"
+                      key={index}
+                      className={` ${
+                        index !== 0 ? "-ml-[8rem] md:-ml-[8rem]" : ""
+                      }  flex gap-6  relative left-16`}
                     >
                       <Image
                         src={card}
                         width={135}
                         height={140}
                         layout="fixed"
+                        priority
                       />
                     </div>
-                  )
+                  );
                 })
               ) : (
                 <div className="flex relative right-12 w-fit">
@@ -348,9 +347,8 @@ export const Table: React.FC<IProps> = ({
                 </div>
               )}
 
-              <h1 className="relative top-24 right-16  text-white font-poppins text-xl">
-                {deckData.player1.cards.length > 0 &&
-                  truncateEthAddress(account)}
+              <h1 className="relative top-24 right-40  text-white font-poppins text-xl">
+                {cards.playerOneCards.length > 0 && truncateEthAddress(account)}
               </h1>
             </div>
 
@@ -413,7 +411,7 @@ export const Table: React.FC<IProps> = ({
           {/* <ShareModal /> */}
         </div>
       </div>
-    )
+    );
   } else {
     return (
       <div className="   w-full  ">
@@ -446,7 +444,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   } else {
                     return (
                       <div className="z-10">
@@ -457,7 +455,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   }
                 })
               ) : (
@@ -571,7 +569,7 @@ export const Table: React.FC<IProps> = ({
                             layout="fixed"
                           />
                         </div>
-                      )
+                      );
                     } else {
                       if (account === playerOne) {
                         return (
@@ -589,7 +587,7 @@ export const Table: React.FC<IProps> = ({
                               layout="fixed"
                             />
                           </div>
-                        )
+                        );
                       } else if (account === playerTwo) {
                         return (
                           <div
@@ -604,7 +602,7 @@ export const Table: React.FC<IProps> = ({
                               layout="fixed"
                             />
                           </div>
-                        )
+                        );
                       }
                     }
                   })
@@ -649,7 +647,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   } else {
                     if (account === playerOne) {
                       return (
@@ -665,7 +663,7 @@ export const Table: React.FC<IProps> = ({
                             layout="fixed"
                           />
                         </div>
-                      )
+                      );
                     } else if (account === playerTwo) {
                       return (
                         <div
@@ -682,7 +680,7 @@ export const Table: React.FC<IProps> = ({
                             layout="fixed"
                           />
                         </div>
-                      )
+                      );
                     }
                   }
                 })
@@ -744,7 +742,7 @@ export const Table: React.FC<IProps> = ({
                             layout="fixed"
                           />
                         </div>
-                      )
+                      );
                     } else {
                       return (
                         <div
@@ -761,7 +759,7 @@ export const Table: React.FC<IProps> = ({
                             layout="fixed"
                           />
                         </div>
-                      )
+                      );
                     }
                   })
                 ) : (
@@ -805,7 +803,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   } else {
                     return (
                       <div
@@ -822,7 +820,7 @@ export const Table: React.FC<IProps> = ({
                           layout="fixed"
                         />
                       </div>
-                    )
+                    );
                   }
                 })
               ) : (
@@ -929,6 +927,6 @@ export const Table: React.FC<IProps> = ({
           {/* <ShareModal /> */}
         </div>
       </div>
-    )
+    );
   }
-}
+};
