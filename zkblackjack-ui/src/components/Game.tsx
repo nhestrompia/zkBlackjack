@@ -473,14 +473,18 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     checkAce()
-  }, [sums.playerOneSum])
+  }, [sums])
 
   const dealCards = (deckData: string[]) => {
     const usedDeck: string[] = deckData
 
     if (deckData.length >= 4) {
       // setRoundText([])
-
+      // setSums({
+      //   playerOneSum: 0,
+      //   playerTwoSum: 0,
+      //   houseSum: 0,
+      // })
       setAces({
         playerOneAces: 0,
         playerTwoAces: 0,
@@ -490,11 +494,6 @@ export const Game: React.FC<IProps> = ({
         playerOneCards: [],
         playerTwoCards: [],
         houseCards: [],
-      })
-      setSums({
-        playerOneSum: 0,
-        playerTwoSum: 0,
-        houseSum: 0,
       })
 
       // setIsStand(false)
@@ -535,15 +534,14 @@ export const Game: React.FC<IProps> = ({
 
         houseValue += value!
       }
-
-      setSums({
-        ...sums,
-        houseSum: sums.houseSum + houseValue,
-      })
-      setCards({
-        ...cards,
-        houseCards: housecurrentCards,
-      })
+      // setSums({
+      //   ...sums,
+      //   houseSum: sums.houseSum + houseValue,
+      // })
+      // setCards({
+      //   ...cards,
+      //   houseCards: housecurrentCards,
+      // })
 
       let playerOneValue = 0
 
@@ -566,11 +564,13 @@ export const Game: React.FC<IProps> = ({
 
       setCards({
         ...cards,
+        houseCards: housecurrentCards,
         playerOneCards: playerOneCurrentCards,
       })
       setSums({
         ...sums,
-        playerOneSum: sums.playerOneSum + playerOneValue,
+        houseSum: houseValue,
+        playerOneSum: playerOneValue,
       })
       setCurrentDeck(usedDeck)
 

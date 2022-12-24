@@ -53,6 +53,13 @@ export interface Card {
   playerTwoCards: string[]
   houseCards: string[]
 }
+
+export interface Cards {
+  playerOneCards: Card[]
+  playerTwoCards: Card[]
+  houseCards: Card[]
+}
+
 export interface Sum {
   playerOneSum: number
   playerTwoSum: number
@@ -133,17 +140,17 @@ function SocketsProvider(props: any) {
       aces: 0,
     },
   })
-  const [sums, setSums] = useState<Sum | null>({
+  const [sums, setSums] = useState<Sum>({
     playerOneSum: 0,
     playerTwoSum: 0,
     houseSum: 0,
   })
-  const [cards, setCards] = useState<Card | null>({
+  const [cards, setCards] = useState<Cards>({
     playerOneCards: [],
     playerTwoCards: [],
     houseCards: [],
   })
-  const [aces, setAces] = useState<Ace | null>({
+  const [aces, setAces] = useState<Ace>({
     playerOneAces: 0,
     playerTwoAces: 0,
     houseAces: 0,

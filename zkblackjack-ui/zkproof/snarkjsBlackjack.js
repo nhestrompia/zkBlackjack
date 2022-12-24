@@ -1,13 +1,10 @@
 import { exportCallDataGroth16 } from "./snarkjsZkproof"
 
 export async function blackjackCalldata(player, house) {
-  console.log("player type", typeof player)
   const input = {
     sumPlayer: player,
     sumHouse: house,
   }
-
-  console.log("input", input)
 
   let dataResult
 
