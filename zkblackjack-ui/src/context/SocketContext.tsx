@@ -6,24 +6,24 @@ import io, { Socket } from "socket.io-client"
 interface Context {
   socket: Socket
   aces: Ace
-  setAces: Function
+  setAces: (val: Ace) => false
   // username?: string;
   // setUsername: Function;
   // messages?: { message: string; time: string; username: string }[];
   // setMessages: Function;
   startDeck: string[]
-  setStartDeck: Function
+  setStartDeck: (val: string[]) => false
 
   roomId?: string
   cards: Card
-  setCards: Function
+  setCards: (val: Card) => void
   sums: Sum
-  setSums: Function
-  dealCards: Function
+  setSums: (val: Sum) => void
+  dealCards: (val: string[]) => void
   deckData: SocketData
-  setDeckData: Function
-  setIsGameActive: (val: boolean) => false
-  setIsSinglePlayer: (val: boolean) => false
+  setDeckData: (val: SocketData) => void
+  setIsGameActive: (val: boolean) => void
+  setIsSinglePlayer: (val: boolean) => void
   isSinglePlayer: boolean
   isGameActive: boolean
   // rooms: object;
@@ -91,14 +91,14 @@ const SocketContext = createContext<Context>({
     playerTwoAces: 0,
     houseAces: 0,
   },
-  setAces: () => false,
+  setAces: (val: Ace) => false,
   cards: {
     playerOneCards: [],
     playerTwoCards: [],
     houseCards: [],
   },
   setCards: () => false,
-  dealCards: () => false,
+  dealCards: (val: string[]) => false,
   sums: {
     playerOneSum: 0,
     playerTwoSum: 0,
@@ -114,7 +114,6 @@ const SocketContext = createContext<Context>({
 
 function SocketsProvider(props: any) {
   const [startDeck, setStartDeck] = useState<string[]>([])
-  // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
   const [deckData, setDeckData] = useState<SocketData>({
     room: "",
     deckCards: [],
@@ -134,17 +133,17 @@ function SocketsProvider(props: any) {
       aces: 0,
     },
   })
-  const [sums, setSums] = useState<Sum>({
+  const [sums, setSums] = useState<Sum | null>({
     playerOneSum: 0,
     playerTwoSum: 0,
     houseSum: 0,
   })
-  const [cards, setCards] = useState<Card>({
+  const [cards, setCards] = useState<Card | null>({
     playerOneCards: [],
     playerTwoCards: [],
     houseCards: [],
   })
-  const [aces, setAces] = useState<Ace>({
+  const [aces, setAces] = useState<Ace | null>({
     playerOneAces: 0,
     playerTwoAces: 0,
     houseAces: 0,

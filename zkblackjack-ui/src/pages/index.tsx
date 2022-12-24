@@ -7,7 +7,6 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { constructDeck } from "../utils/constructDeck"
 import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,

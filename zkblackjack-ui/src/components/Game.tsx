@@ -453,20 +453,20 @@ export const Game: React.FC<IProps> = ({
       const value = getValue(playerCard!)
       playerValue += value!
       if (value == 11) {
-        setAces((prevState: Ace) => ({
-          ...prevState,
-          playerOneAces: prevState.playerOneAces + 1,
-        }))
+        setAces({
+          ...aces,
+          playerOneAces: aces.playerOneAces + 1,
+        })
       }
-      setCards((prevState: Card) => ({
-        ...prevState,
-        playerOneCards: [...prevState.playerOneCards, cardImage],
-      }))
+      setCards({
+        ...cards,
+        playerOneCards: [...cards.playerOneCards, cardImage],
+      })
 
-      setSums((prevState: Sum) => ({
-        ...prevState,
-        playerOneSum: prevState.playerOneSum + playerValue,
-      }))
+      setSums({
+        ...sums,
+        playerOneSum: sums.playerOneSum + playerValue,
+      })
       setCurrentDeck(tempDeck)
     }
   }
@@ -510,10 +510,10 @@ export const Game: React.FC<IProps> = ({
         housecurrentCards.push(cardImage)
         if (value == 11) {
           // setAces({...aces, houseAces : aces.houseAces + 1})
-          setAces((prevAces: any) => ({
-            ...prevAces,
-            houseAces: prevAces.houseAces + 1,
-          }))
+          setAces({
+            ...aces,
+            houseAces: aces.houseAces + 1,
+          })
         }
       }
 
@@ -527,23 +527,23 @@ export const Game: React.FC<IProps> = ({
 
         const value = getValue(dealerCard!)
         if (value == 11) {
-          setAces((prevAces: any) => ({
-            ...prevAces,
-            houseAces: prevAces.houseAces + 1,
-          }))
+          setAces({
+            ...aces,
+            houseAces: aces.houseAces + 1,
+          })
         }
 
         houseValue += value!
       }
 
-      setSums((prevSums: any) => ({
-        ...prevSums,
-        houseSum: prevSums.houseSum + houseValue,
-      }))
-      setCards((prevCards: any) => ({
-        ...prevCards,
+      setSums({
+        ...sums,
+        houseSum: sums.houseSum + houseValue,
+      })
+      setCards({
+        ...cards,
         houseCards: housecurrentCards,
-      }))
+      })
 
       let playerOneValue = 0
 
@@ -557,21 +557,21 @@ export const Game: React.FC<IProps> = ({
         playerOneValue += value!
         if (value == 11) {
           // setAceNumberPlayerOne((prevState) => prevState + 1)
-          setAces((prevAces: any) => ({
-            ...prevAces,
-            playerOneAces: prevAces.playerOneAces + 1,
-          }))
+          setAces({
+            ...aces,
+            playerOneAces: aces.playerOneAces + 1,
+          })
         }
       }
 
-      setCards((prevCards: any) => ({
-        ...prevCards,
+      setCards({
+        ...cards,
         playerOneCards: playerOneCurrentCards,
-      }))
-      setSums((prevSums: any) => ({
-        ...prevSums,
-        playerOneSum: prevSums.playerOneSum + playerOneValue,
-      }))
+      })
+      setSums({
+        ...sums,
+        playerOneSum: sums.playerOneSum + playerOneValue,
+      })
       setCurrentDeck(usedDeck)
 
       if (
@@ -608,15 +608,15 @@ export const Game: React.FC<IProps> = ({
 
   const checkAce = () => {
     if (sums.playerOneSum > 21 && aces.playerOneAces !== 0) {
-      setSums((prevSums: Sum) => ({
-        ...prevSums,
-        playerOneSum: prevSums.playerOneSum - 10,
-      }))
+      setSums({
+        ...sums,
+        playerOneSum: sums.playerOneSum - 10,
+      })
 
-      setAces((prevState: Ace) => ({
-        ...prevState,
-        playerOneAces: prevState.playerOneAces - 1,
-      }))
+      setAces({
+        ...aces,
+        playerOneAces: aces.playerOneAces - 1,
+      })
 
       return true
     }
@@ -629,15 +629,15 @@ export const Game: React.FC<IProps> = ({
     // }
     if (sums.houseSum > 21 && aces.houseAces !== 0) {
       // setHouseSum((prevState: number) => prevState - 10)
-      setSums((prevState: Sum) => ({
-        ...prevState,
-        houseSum: prevState.houseSum - 10,
-      }))
+      setSums({
+        ...sums,
+        houseSum: sums.houseSum - 10,
+      })
 
-      setAces((prevState: Ace) => ({
-        ...prevState,
-        houseAces: prevState.playerOneAces - 1,
-      }))
+      setAces({
+        ...aces,
+        houseAces: aces.playerOneAces - 1,
+      })
 
       // setAceNumberHouse((prevState) => prevState - 1)
       return true
