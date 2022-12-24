@@ -841,6 +841,7 @@ export const Table: React.FC<IProps> = ({
                   } else {
                     return (
                       <div
+                        key={card}
                         className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
