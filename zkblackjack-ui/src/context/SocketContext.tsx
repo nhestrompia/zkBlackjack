@@ -59,7 +59,7 @@ export interface Sum {
   houseSum: number
 }
 
-const socket = io("http://localhost:3001")
+const socket = io("https://zkblackjack.onrender.com/")
 
 const SocketContext = createContext<Context>({
   socket,
