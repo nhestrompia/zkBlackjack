@@ -10,8 +10,8 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
-    // origin : "https://zkblackjack.onrender.com/",
+    // origin: "http://localhost:3000",
+    origin: "https://zkblackjack.onrender.com/",
     methods: ["GET", "POST"],
   },
 })
@@ -300,7 +300,7 @@ io.on("connection", (socket) => {
     console.log(`User :${socket.id} has disconnected`)
   })
 })
-
+const PORT = process.env.PORT || 3001
 server.listen(3001, () => {
   console.log("Server is running")
 })
