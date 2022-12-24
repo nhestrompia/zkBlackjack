@@ -1,65 +1,65 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import io, { Socket } from "socket.io-client";
+import { createContext, useContext, useEffect, useState } from "react"
+import io, { Socket } from "socket.io-client"
 // import { SOCKET_URL } from "../config/default";
 // import EVENTS from "../config/events";
 
 interface Context {
-  socket: Socket;
-  aces: Ace;
-  setAces: Function;
+  socket: Socket
+  aces: Ace
+  setAces: Function
   // username?: string;
   // setUsername: Function;
   // messages?: { message: string; time: string; username: string }[];
   // setMessages: Function;
-  startDeck: string[];
-  setStartDeck: Function;
+  startDeck: string[]
+  setStartDeck: Function
 
-  roomId?: string;
-  cards: Card;
-  setCards: Function;
-  sums: Sum;
-  setSums: Function;
-  dealCards: Function;
-  deckData: SocketData;
-  setDeckData: Function;
-  setIsGameActive: (val: boolean) => false;
-  setIsSinglePlayer: (val: boolean) => false;
-  isSinglePlayer: boolean;
-  isGameActive: boolean;
+  roomId?: string
+  cards: Card
+  setCards: Function
+  sums: Sum
+  setSums: Function
+  dealCards: Function
+  deckData: SocketData
+  setDeckData: Function
+  setIsGameActive: (val: boolean) => false
+  setIsSinglePlayer: (val: boolean) => false
+  isSinglePlayer: boolean
+  isGameActive: boolean
   // rooms: object;
 }
 
 interface SocketData {
-  room: string;
-  deckCards: string[];
-  house: PlayerInfo;
-  player1: PlayerInfo;
-  player2: PlayerInfo;
+  room: string
+  deckCards: string[]
+  house: PlayerInfo
+  player1: PlayerInfo
+  player2: PlayerInfo
 }
 
 interface PlayerInfo {
-  cards: string[];
-  aces: number;
-  sum: number;
+  cards: string[]
+  aces: number
+  sum: number
 }
 
 export interface Ace {
-  playerOneAces: number;
-  playerTwoAces: number;
-  houseAces: number;
+  playerOneAces: number
+  playerTwoAces: number
+  houseAces: number
 }
 export interface Card {
-  playerOneCards: string[];
-  playerTwoCards: string[];
-  houseCards: string[];
+  playerOneCards: string[]
+  playerTwoCards: string[]
+  houseCards: string[]
 }
 export interface Sum {
-  playerOneSum: number;
-  playerTwoSum: number;
-  houseSum: number;
+  playerOneSum: number
+  playerTwoSum: number
+  houseSum: number
 }
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:3001")
 
 const SocketContext = createContext<Context>({
   socket,
@@ -110,10 +110,10 @@ const SocketContext = createContext<Context>({
   setStartDeck: (val: string[]) => false,
   roomId: "",
   isGameActive: false,
-});
+})
 
 function SocketsProvider(props: any) {
-  const [startDeck, setStartDeck] = useState<string[]>([]);
+  const [startDeck, setStartDeck] = useState<string[]>([])
   // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
   const [deckData, setDeckData] = useState<SocketData>({
     room: "",
@@ -133,25 +133,25 @@ function SocketsProvider(props: any) {
       sum: 0,
       aces: 0,
     },
-  });
+  })
   const [sums, setSums] = useState<Sum>({
     playerOneSum: 0,
     playerTwoSum: 0,
     houseSum: 0,
-  });
+  })
   const [cards, setCards] = useState<Card>({
     playerOneCards: [],
     playerTwoCards: [],
     houseCards: [],
-  });
+  })
   const [aces, setAces] = useState<Ace>({
     playerOneAces: 0,
     playerTwoAces: 0,
     houseAces: 0,
-  });
+  })
 
-  const [isGameActive, setIsGameActive] = useState(false);
-  const [isSinglePlayer, setIsSinglePlayer] = useState(false);
+  const [isGameActive, setIsGameActive] = useState(false)
+  const [isSinglePlayer, setIsSinglePlayer] = useState(false)
 
   // socket.on("player_joined", (value) => {
   //   setRoomId(value);
@@ -348,12 +348,11 @@ function SocketsProvider(props: any) {
           sum: data.player2.sum,
           aces: data.player2.aces,
         },
-      });
-      console.log("coming data in newplayer", deckData);
+      })
       // dealCards(data)
       // setIsGameStarted(true)
-      setIsGameActive(true);
-    });
+      setIsGameActive(true)
+    })
 
     socket.on("got_card", (data) => {
       setDeckData((prevState) => ({
@@ -369,8 +368,8 @@ function SocketsProvider(props: any) {
           sum: data.player2.sum,
           aces: data.player2.aces,
         },
-      }));
-    });
+      }))
+    })
 
     socket.on("current_deck", (data) => {
       // setStartDeck(data.deck)
@@ -379,12 +378,10 @@ function SocketsProvider(props: any) {
       //   playerTwoCards: data.playerTwoCards,
       //   houseCards: data.houseCards,
       // })
-    });
+    })
 
     // socket.on()
-  }, [socket]);
-
-  console.log("deckdata in context", deckData);
+  }, [socket])
 
   return (
     <SocketContext.Provider
@@ -407,9 +404,9 @@ function SocketsProvider(props: any) {
       }}
       {...props}
     />
-  );
+  )
 }
 
-export const useSockets = () => useContext(SocketContext);
+export const useSockets = () => useContext(SocketContext)
 
-export default SocketsProvider;
+export default SocketsProvider

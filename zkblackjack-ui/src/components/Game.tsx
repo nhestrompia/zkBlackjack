@@ -18,7 +18,6 @@ import "react-toastify/dist/ReactToastify.css"
 import { Modal } from "./Modal"
 import { Table } from "./Table"
 import { useRouter } from "next/router"
-// import { constructDeck } from "../utils/constructDeck"
 import { useSockets } from "../context/SocketContext"
 import { blackjackCalldata } from "../../zkproof/snarkjsBlackjack"
 import { Ace, Card, Sum } from "../context/SocketContext"
@@ -27,11 +26,7 @@ import Router from "next/router"
 interface IProps {
   library: ethers.providers.Web3Provider
   account: string
-  // socket: any
   room?: string
-  // isGameActive?: boolean;
-  // setIsGameActive?: (val: boolean) => void;
-  setIsSinglePlayer?: (val: boolean) => void
 }
 
 interface TransactionResponse {
@@ -48,40 +43,12 @@ export interface Score {
   playerTwo: number
 }
 
-// enum LeaderboardActionKind {
-//   WIN_ROUND = "win-round",
-//   LOSE_ROUND = "lose-round",
-//   DRAW_ROUND = "draw-round",
-// }
-
-// interface LeaderboardAction {
-//   type: LeaderboardActionKind
-//   payload: string
-// }
-
-// const reducer = (state: Array<string>, action: LeaderboardAction) => {
-//   switch (action.type) {
-//     case LeaderboardActionKind.WIN_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.LOSE_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.DRAW_ROUND:
-//       return [...state, action.payload]
-//     default:
-//       throw new Error(`Unhandled  action type ${action.type}`)
-//   }
-// }
-
 export const Game: React.FC<IProps> = ({
   library,
   account,
-  // isGameActive,
-  // setIsGameActive,
-  // socket,
+
   room,
 }) => {
-  // const [isStandSingle, setIsStandSingle] = useState(false)
-  // const [roundText, dispatch] = useReducer(reducer, [])
   const [currentDeck, setCurrentDeck] = useState<string[]>([])
   const [score, setScore] = useState<Score>({
     playerOne: 0,
@@ -111,67 +78,24 @@ export const Game: React.FC<IProps> = ({
     setIsGameActive,
   } = useSockets()
 
-  // const handleClick = (player: string) => {
-  //   if (player === "1") {
-  //     dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
-  //   } else {
-  //     dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
-  //   }
-  // }
   const router = useRouter()
   const effectRan = useRef(false)
-  // const socket = useContext(SocketContext)
 
   useEffect(() => {
-    console.log("ASDASD deck", isSinglePlayer)
-
     if (effectRan.current === false) {
-      // setRoundText([])
       setIsCanWithdraw(false)
-      // setIsGameActive(true)
+
       setIsGameEnded(false)
-      // setPlayerOneCards([])
+
       if (isSinglePlayer) {
-        console.log("first deck")
         const firstDeck = constructDeck()
         dealCards(firstDeck)
       }
-      // setPlayerTwoCards([])
-      // setHouseCards([])
-      // setHouseSum(0)
-      // setPlayerOneSum(0)
-      // setPlayerTwoSum(0)
-      // setAceNumberPlayerOne(0)
-      // setAceNumberPlayerTwo(0)
-      // setAceNumberHouse(0)
-      // constructDeck()
     }
     return () => {
       effectRan.current = true
     }
   }, [])
-
-  // const sendMessage = async () => {
-  //   if (currentMessage !== "") {
-  //     const messageData = {
-  //       room: room,
-  //       author: username,
-  //       message: currentMessage,
-
-  //     };
-
-  //     await socket.emit("send_message", messageData);
-
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (!account) {
-  //     setRoundText(["Connect", "Wallet"])
-  //   } else {
-  //     setRoundText([])
-  //   }
-  // }, [account])
 
   const deck: string[] = []
 
@@ -256,64 +180,7 @@ export const Game: React.FC<IProps> = ({
     }
   }
 
-  // useEffect(() => {
-  //   if (isGameEnded === true) {
-  //     unlockBet(account);
-  //     window.setTimeout(() => {
-  //       if()
-  //       if (score! > 0) {
-  //         toast.info(
-  //           "You have won the game and extra 0.01 ETH! Wait for withdraw button to come",
-  //           {
-  //             position: "top-center",
-  //             autoClose: 5000,
-  //             hideProgressBar: true,
-  //             closeOnClick: true,
-  //             pauseOnHover: true,
-  //             draggable: true,
-  //             progress: 0,
-  //           }
-  //         );
-  //         // setRoundText(["Wait for", `Evaluation`])
-  //       } else if (score === 0) {
-  //         toast.info(
-  //           "It was a close game but it ended in tie. Wait for withdraw button to come to get back your initial bet",
-  //           {
-  //             position: "top-center",
-  //             autoClose: 5000,
-  //             hideProgressBar: true,
-  //             closeOnClick: true,
-  //             pauseOnHover: true,
-  //             draggable: true,
-  //             progress: 0,
-  //           }
-  //         );
-  //         // setRoundText(["Wait for", `Evaluation`])
-  //       } else {
-  //         toast.info(
-  //           "It was a close game but you have lost it. Play again to earn back your 0.01 ETH ",
-  //           {
-  //             position: "top-center",
-  //             autoClose: 5000,
-  //             hideProgressBar: true,
-  //             closeOnClick: true,
-  //             pauseOnHover: true,
-  //             draggable: true,
-  //             progress: 0,
-  //           }
-  //         );
-  //         // setRoundText(["Wait for", `Evaluation`])
-  //       }
-  //       // setIsGameActive(false)
-  //       setLoading(true);
-  //     }, 2000);
-  //   }
-  // }, [isGameEnded]);
-
-  // console.log("socket in game", socket)
-
   useEffect(() => {
-    console.log("is game", isGameActive)
     if (isGameEnded) {
       if (isSinglePlayer) {
         unlockBet(account, "1")
@@ -349,11 +216,8 @@ export const Game: React.FC<IProps> = ({
       )
       const player = await blackjackContract.players(playerAddress)
 
-      console.log("player", player)
-
       const gameId = await player.gameId
 
-      console.log("gameId", gameId)
       if (playerNumber === "1") {
         if (score.playerOne > 0) {
           toast.info(
@@ -368,11 +232,6 @@ export const Game: React.FC<IProps> = ({
               progress: 0,
             }
           )
-          // setRoundText(["Wait for", `Evaluation`])
-
-          // setRoundText(["Wait for", `Evaluation`])
-
-          // setRoundText(["Wait for", `Evaluation`])
 
           const data = {
             from: signerAddress,
@@ -526,7 +385,6 @@ export const Game: React.FC<IProps> = ({
       } else {
         return false
       }
-      console.log("result", typeof result)
     } catch (error) {
       console.error(error)
     }
@@ -573,7 +431,6 @@ export const Game: React.FC<IProps> = ({
       deck[randomNumber] = currentCard ?? ""
     }
     setCurrentDeck(deck)
-    console.log("deck constructed", deck)
     return deck
   }
 
@@ -614,36 +471,9 @@ export const Game: React.FC<IProps> = ({
     }
   }
 
-  // useEffect(() => {
-  //   if (isSinglePlayer) {
-  //     if (currentDeck.length <= 4) {
-  //       setIsGameActive(false);
-  //       setIsGameEnded(true);
-  //     } else {
-  //       console.log("deck data in game", currentDeck);
-  //     }
-  //   } else {
-  //     // setIsGameActive(false)
-  //   }
-  //   // const data = {
-  //   //   room: room,
-  //   //   deck: currentDeck,
-  //   //   playerOneCards: playerOneCards,
-  //   //   playerTwoCards: playerTwoCards,
-  //   // }
-  //   // socket.emit("card_dealt", data)
-  // }, [currentDeck]);
-
   useEffect(() => {
-    // setCurrentDeck(startDeck)
-    // if (!isSinglePlayer) {
-    //   setIsGameActive(true)
-    // }
-  }, [socket])
-
-  // useEffect(() => {
-  //   checkAce()
-  // }, [sums.playerOneSum,sums.playerTwoSum])
+    checkAce()
+  }, [sums.playerOneSum])
 
   const dealCards = (deckData: string[]) => {
     let usedDeck: string[] = deckData
@@ -820,7 +650,6 @@ export const Game: React.FC<IProps> = ({
     draw: string,
     playerSum: string
   ) => {
-    console.log("hget winner ", typeof result)
     if (isSinglePlayer) {
       if (result === "1") {
         setRoundText((prevState) => ({
@@ -956,7 +785,6 @@ export const Game: React.FC<IProps> = ({
         }
       }
     }
-    console.log("rounddasd text", roundText)
   }
 
   const getValue = (card: string) => {
@@ -976,231 +804,6 @@ export const Game: React.FC<IProps> = ({
   }
 
   return (
-    // <>
-    //   <div
-    //     className="items-center justify-center mt-20 md:grid md:grid-cols-3 md:-mt-12"
-    //     id="page"
-    //   >
-    //     <div className="flex flex-col items-center pt-5 lg:col-start-1 md:mt-0">
-    //       {isGameActive ? (
-    //         <h1 className="pb-4 text-3xl ">Player score : {score}</h1>
-    //       ) : isGameEnded ? (
-    //         <h1 className="pb-5 text-3xl ">Player score : {score}</h1>
-    //       ) : (
-    //         ""
-    //       )}
-    //       <h1></h1>
-
-    //       {!isCanWithdraw && roundText[0] !== "Wait for" && account && (
-    //         <button
-    //           className={`${
-    //             isGameActive ? "hidden" : "md:mt-4"
-    //           } p-4 mb-4 hover:scale-110 transition duration-200`}
-    //           onClick={startGame}
-    //         >
-    //           <Image
-    //             src={"/start.svg"}
-    //             width={120}
-    //             height={120}
-    //             layout={"fixed"}
-    //           />
-    //         </button>
-    //       )}
-    //       {isCanWithdraw && score! >= 0 && (
-    //         <button
-    //           className={`${
-    //             isGameActive ? "mt-8" : ""
-    //           } hover:scale-110 transition duration-200`}
-    //           onClick={withdrawBet}
-    //         >
-    //           <Image
-    //             className=""
-    //             src={"/withdraw.svg"}
-    //             width={120}
-    //             height={120}
-    //             layout={"fixed"}
-    //           />
-    //         </button>
-    //       )}
-    //     </div>
-    //     <div className="flex flex-col items-center justify-center md:col-start-2">
-    //       <h1 className="p-1 mt-2 mb-6 text-2xl font-poppins">Dealer</h1>
-    //       <div className="flex flex-wrap items-center lg:flex-nowrap justify-evenly lg:row-start-1 md:flex-row md:justify-center md:gap-10 ">
-    //         {houseCards?.length !== 0 ? (
-    //           houseCards?.map((card, index) => {
-    //             if (index == 0) {
-    //               return (
-    //                 <div
-    //                   className={`${
-    //                     isStand ? "transition translate-x-1 duration-300" : ""
-    //                   }`}
-    //                   key={index}
-    //                 >
-    //                   <Image
-    //                     src={isStand ? card : "/back.png"}
-    //                     layout="fixed"
-    //                     width={160}
-    //                     height={220}
-    //                     priority
-    //                   />
-    //                 </div>
-    //               )
-    //             } else {
-    //               return (
-    //                 <div
-    //                   key={index}
-    //                   className={`${
-    //                     index !== 0 ? "-ml-[8rem] md:-ml-[10.5rem]" : ""
-    //                   }  `}
-    //                 >
-    //                   <Image
-    //                     src={card}
-    //                     layout="fixed"
-    //                     width={160}
-    //                     height={220}
-    //                     priority
-    //                   />
-    //                 </div>
-    //               )
-    //             }
-    //           })
-    //         ) : (
-    //           <div className="flex gap-10">
-    //             <Image
-    //               src={"/back.png"}
-    //               layout="fixed"
-    //               width={160}
-    //               height={220}
-    //               loading="lazy"
-    //             />
-
-    //             <Image
-    //               src={"/back.png"}
-    //               layout="fixed"
-    //               width={160}
-    //               height={220}
-    //               loading="lazy"
-    //             />
-    //           </div>
-    //         )}
-    //       </div>
-
-    //       <div className="flex flex-row items-center w-full -my-2 justify-evenly ">
-    //         {roundText && !loading && (
-    //           <span
-    //             className={` text-3xl w-1/3 text-right ${
-    //               roundText[0] === "It's a" ? "" : ""
-    //             }  mt-4 font-sans  `}
-    //           >
-    //             {roundText[0]}
-    //           </span>
-    //         )}
-    //         <div
-    //           className={`${roundText ? "" : " "} ${
-    //             roundText && roundText[0] === "It's a" ? "" : ""
-    //           } mt-4 md:mt-10 w-1/3 ${
-    //             loading ? "opacity-60" : "opacity-20"
-    //           } mb-5 md:mb-0 flex justify-center `}
-    //         >
-    //           <Image
-    //             className={`${loading ? "animate-spin " : ""}`}
-    //             src={"/logo.svg"}
-    //             width={loading ? 90 : 56}
-    //             height={89}
-    //             layout={"fixed"}
-    //           />
-    //         </div>
-    //         {roundText && !loading && (
-    //           <span className={` text-3xl w-1/3 font-sans mt-4`}>
-    //             {roundText![1]}
-    //           </span>
-    //         )}
-    //       </div>
-    //       <div className="flex items-center justify-evenly md:flex-row md:justify-center md:gap-10 md:mt-10 md:mb-4">
-    //         {playerCards.length !== 0 ? (
-    //           playerCards.map((card, index) => {
-    //             return (
-    //               <div
-    //                 key={index}
-    //                 className={` ${
-    //                   index !== 0 ? "-ml-[8rem] md:-ml-[10.5rem]" : ""
-    //                 }  flex gap-10  `}
-    //               >
-    //                 <Image
-    //                   src={card}
-    //                   layout="fixed"
-    //                   width={160}
-    //                   height={220}
-    //                   priority
-    //                 />
-    //               </div>
-    //             )
-    //           })
-    //         ) : (
-    //           <div className="flex gap-10">
-    //             <Image
-    //               src={"/back.png"}
-    //               layout="fixed"
-    //               width={160}
-    //               height={220}
-    //               loading="lazy"
-    //             />
-
-    //             <Image
-    //               src={"/back.png"}
-    //               layout="fixed"
-    //               width={160}
-    //               height={220}
-    //               loading="lazy"
-    //             />
-    //           </div>
-    //         )}
-    //       </div>
-    //       <h1 className="mt-2 text-2xl font-poppins">Player - {playerOneSum}</h1>
-    //     </div>
-
-    //     <div className="flex items-center justify-center col-start-2 gap-4 mt-4 mr-4 md:row-start-3 lg:row-start-1 lg:col-start-3 md:mt-8 md:mr-0 lg:mr-0 lg:flex-col lg:content-end">
-    //       {isGameActive && playerOneSum > 0 && (
-    //         <button
-    //           className="mx-2 transition duration-200 lg:px-8 hover:scale-110"
-    //           onClick={getWinner}
-    //         >
-    //           <Image
-    //             src={"/stand.svg"}
-    //             width={120}
-    //             height={120}
-    //             layout={"fixed"}
-    //           />
-    //         </button>
-    //       )}
-    //       {isGameActive && playerOneSum > 0 && currentDeck.length > 0 && (
-    //         <button
-    //           className={`${
-    //             playerOneSum >= 21 ? "cursor-not-allowed " : "cursor-pointer"
-    //           } hover:scale-110 transition duration-200`}
-    //           onClick={() => getCard(currentDeck)}
-    //         >
-    //           <Image
-    //             src={"/hit.svg"}
-    //             width={120}
-    //             height={120}
-    //             layout={"fixed"}
-    //           />
-    //         </button>
-    //       )}
-    //     </div>
-    //   </div>
-    //   <ToastContainer
-    //     position="top-center"
-    //     hideProgressBar
-    //     newestOnTop={false}
-    //     closeOnClick
-    //     rtl={false}
-    //     pauseOnFocusLoss
-    //     draggable
-    //   />
-    // </>
-
     <div className="h-fit">
       <Table
         isGameEnded={isGameEnded}
@@ -1214,16 +817,11 @@ export const Game: React.FC<IProps> = ({
         roundText={roundText}
         score={score}
         isCanWithdraw={isCanWithdraw}
-        // unlockBet={unlockBet}
-        // getCard={getCard}
         calculateProof={calculateProof}
         withdrawBet={withdrawBet}
-        // isGameActive={isGameActive}
-        // setIsGameActive={setIsGameActive!}
-        // getWinner={getWinner}
       />
       <ToastContainer
-        position="top-left"
+        position="bottom-right"
         autoClose={4000}
         hideProgressBar
         newestOnTop={false}

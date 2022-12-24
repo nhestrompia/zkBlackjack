@@ -120,9 +120,6 @@ export const Table: React.FC<IProps> = ({
     setPlayerTwo(roomCheck[3])
   }
 
-  console.log("playerone address", playerOne)
-  console.log("playerwto address", playerTwo)
-
   const hitMe = () => {
     let playerNumber: string
     if (account == playerTwo) {
@@ -163,7 +160,6 @@ export const Table: React.FC<IProps> = ({
     )
 
     const tx = await blackjackContract.verifierAddress()
-    console.log("verifier addreesss", tx)
   }
 
   const stand = async () => {
@@ -184,14 +180,7 @@ export const Table: React.FC<IProps> = ({
     } else {
       setPlayerOne(account)
     }
-    console.log("gotplayers")
   }, [deckData, isSinglePlayer])
-
-  console.log("player1", cards.playerOneCards)
-  console.log("player2", cards.playerTwoCards)
-  console.log("house", cards.houseCards!)
-  console.log("deckdata in table", deckData)
-  console.log("current deck table", currentDeck)
 
   if (isSinglePlayer) {
     return (

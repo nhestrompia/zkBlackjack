@@ -43,7 +43,11 @@ export const Scoreboard: React.FC<IProps> = ({
             : ""}
         </div>
       </div>
-      <div className="row-start-4 mt-28">
+      <div
+        className={`row-start-4 ${
+          roundText.playerOne.length >= 10 ? "top-40" : "top-28"
+        } relative`}
+      >
         {roundText.playerOne.length > 0 && (
           <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
         )}
