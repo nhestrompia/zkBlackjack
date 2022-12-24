@@ -697,6 +697,7 @@ export const Table: React.FC<IProps> = ({
                     } else if (account === playerTwo) {
                       return (
                         <div
+                          key={card}
                           className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
@@ -777,6 +778,7 @@ export const Table: React.FC<IProps> = ({
                     } else {
                       return (
                         <div
+                          key={card}
                           className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
@@ -828,6 +830,7 @@ export const Table: React.FC<IProps> = ({
                     return (
                       <div key={card} className=" relative left-[38px] mt-0.5 ">
                         <Image
+                          key={card}
                           src={card}
                           width={135}
                           height={140}
