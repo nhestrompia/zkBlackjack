@@ -207,6 +207,7 @@ export const Table: React.FC<IProps> = ({
                   if (index === 0) {
                     return (
                       <div
+                        key={card}
                         className={` 
                         flex   `}
                       >
@@ -220,7 +221,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div className="-ml-[8rem] md:-ml-[8rem]">
+                      <div key={card} className="-ml-[8rem] md:-ml-[8rem]">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -459,7 +460,10 @@ export const Table: React.FC<IProps> = ({
                 deckData.house.cards.map((card, index) => {
                   if (index === 0) {
                     return (
-                      <div className="-ml-[8rem] mt-0.5 md:-ml-[12rem]">
+                      <div
+                        key={card}
+                        className="-ml-[8rem] mt-0.5 md:-ml-[12rem]"
+                      >
                         <Image
                           src={deckData.house.cards[0]!}
                           width={135}
@@ -470,7 +474,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div className="z-10">
+                      <div key={card} className="z-10">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -597,6 +601,7 @@ export const Table: React.FC<IProps> = ({
                       if (account === playerOne) {
                         return (
                           <div
+                            key={card}
                             className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
@@ -614,6 +619,7 @@ export const Table: React.FC<IProps> = ({
                       } else if (account === playerTwo) {
                         return (
                           <div
+                            key={card}
                             className={` 
      mt-[2px]  relative left-20 `}
                           >
@@ -675,6 +681,7 @@ export const Table: React.FC<IProps> = ({
                     if (account === playerOne) {
                       return (
                         <div
+                          key={card}
                           className={` 
    mt-[2px] relative ${account ? "left-[77px]" : "left-[52px]"} `}
                         >
@@ -759,6 +766,7 @@ export const Table: React.FC<IProps> = ({
                           className=" relative left-[38px] mt-0.5 "
                         >
                           <Image
+                            key={card}
                             src={card}
                             width={135}
                             height={140}
