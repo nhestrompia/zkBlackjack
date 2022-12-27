@@ -23,13 +23,20 @@ import { boolean } from "zod"
 interface IProps {
   library: ethers.providers.Web3Provider
   account: string
+  isLoading: boolean
+  setIsLoading: (val: boolean) => void
 }
 
 interface TransactionResponse {
   hash: string
 }
 
-const Home: NextPage<IProps> = ({ library, account }) => {
+const Home: NextPage<IProps> = ({
+  library,
+  account,
+  isLoading,
+  setIsLoading,
+}) => {
   const [isJoin, setIsJoin] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
@@ -54,43 +61,50 @@ const Home: NextPage<IProps> = ({ library, account }) => {
   }, [])
 
   const joinRoom = async (data: any) => {
-    const signer = library?.getSigner()
+    try {
+      setIsLoading(true)
+      const signer = library?.getSigner()
 
-    const blackjackContract = new Contract(
-      BLACKJACK_CONTRACT_ADDRESS,
-      BLACKJACK_CONTRACT_ABI,
-      signer
-    )
-
-    const roomCheck = await blackjackContract.games(parseInt(room))
-
-    if (
-      room !== "" &&
-      roomCheck[2] !== "0x0000000000000000000000000000000000000000"
-    ) {
-      const joinGame: TransactionResponse = await toast.promise(
-        blackjackContract.joinGame(room, {
-          value: ethers.utils.parseEther("0.01"),
-        }),
-        {
-          pending: "Sending transaction...",
-          success: "Joining to room",
-          error: "Something went wrong 🤯",
-        }
+      const blackjackContract = new Contract(
+        BLACKJACK_CONTRACT_ADDRESS,
+        BLACKJACK_CONTRACT_ABI,
+        signer
       )
-      const confirmation = await library.waitForTransaction(joinGame.hash)
 
-      const sendData = {
-        room: data,
+      const roomCheck = await blackjackContract.games(parseInt(room))
+
+      if (
+        room !== "" &&
+        roomCheck[2] !== "0x0000000000000000000000000000000000000000"
+      ) {
+        const joinGame: TransactionResponse = await toast.promise(
+          blackjackContract.joinGame(room, {
+            value: ethers.utils.parseEther("0.01"),
+          }),
+          {
+            pending: "Sending transaction...",
+            success: "Joining to room",
+            error: "Something went wrong 🤯",
+          }
+        )
+        const confirmation = await library.waitForTransaction(joinGame.hash)
+
+        const sendData = {
+          room: data,
+        }
+        socket.emit("join_room", sendData)
+        setIsGameActive(true)
+        router.push(`/room/${data}`)
       }
-      socket.emit("join_room", sendData)
-      setIsGameActive(true)
-      router.push(`/room/${data}`)
+    } catch (error) {
+      setIsLoading(false)
+      console.error(error)
     }
   }
 
   const createRoom = async () => {
     try {
+      setIsLoading(true)
       const signer = library?.getSigner()
 
       const blackjackContract = new Contract(
@@ -122,6 +136,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
       router.push(`/room/${gameRoom}`)
     } catch (err) {
       console.error(err)
+      setIsLoading(false)
     }
   }
 
@@ -148,6 +163,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
           error: "Something went wrong 🤯",
         }
       )
+      setIsLoading(true)
 
       const confirmation = await library.waitForTransaction(createGame.hash)
       setIsSinglePlayer(true)
@@ -157,6 +173,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
       router.push(`/room/${gameRoom}`)
     } catch (err) {
       console.error(err)
+      setIsLoading(false)
     }
   }
 
@@ -169,7 +186,7 @@ const Home: NextPage<IProps> = ({ library, account }) => {
 
       <main className="bg-[#144b1e]  pb-1 text-white">
         <nav className="px-8 md:px-2 fixed w-full z-20 top-0 left-0 py-3.5    "></nav>
-        {isGameActive ? (
+        {isLoading ? (
           <div className="flex justify-center  relative top-64 left-0 z-20 ">
             <svg
               width="36"

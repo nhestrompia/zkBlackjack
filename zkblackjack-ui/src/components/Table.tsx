@@ -11,7 +11,7 @@ import {
   BLACKJACK_CONTRACT_ADDRESS,
 } from "../../constants"
 import { useSockets } from "../context/SocketContext"
-import { RoundResult, Score } from "./Game"
+import { Score } from "./Game"
 import { getCreate2Address } from "ethers/lib/utils"
 
 interface IProps {
@@ -19,6 +19,7 @@ interface IProps {
   // socket: any
   score: Score
   room?: string
+  isLoading: boolean
   isGameEnded: boolean
   isSinglePlayer: boolean
   currentDeck?: string[]
@@ -27,7 +28,9 @@ interface IProps {
 
   library: ethers.providers.Web3Provider
   getCard?: (val: string[]) => void
-  roundText: RoundResult
+  playerOneRound: string[]
+  playerTwoRound: string[]
+
   // unlockBet : (playerAddress : string, player : string) => void
   withdrawBet: (val: string) => void
   isCanWithdraw: boolean
@@ -86,7 +89,8 @@ export const Table: React.FC<IProps> = ({
   // socket,
   // getCard,
   currentDeck,
-  roundText,
+  playerOneRound,
+  playerTwoRound,
   isCanWithdraw,
   score,
   getCard,
@@ -94,9 +98,9 @@ export const Table: React.FC<IProps> = ({
   isGameEnded,
   // unlockBet,
   withdrawBet,
+  isLoading,
   // getWinner,
 }) => {
-  const [loading, setLoading] = useState<boolean>(false)
   const [playerTwo, setPlayerTwo] = useState("")
   const [playerOne, setPlayerOne] = useState("")
   const { socket, startDeck, cards, deckData, isGameActive, setIsGameActive } =
@@ -163,12 +167,21 @@ export const Table: React.FC<IProps> = ({
   }
 
   const stand = async () => {
-    toast.info("Calculating Winner")
+    // toast.info("Calculating Winner")
+
     let playerNumber: string
-    if (account == playerTwo) {
+    if (account === playerTwo) {
       playerNumber = "2"
+      // setPlayerTwoRound((prevState: string[]) => [
+      //   ...prevState,
+      //   "Calculating...",
+      // ])
     } else {
       playerNumber = "1"
+      // setPlayerOneRound((prevState: string[]) => [
+      //   ...prevState,
+      //   "Calculating...",
+      // ])
     }
 
     await calculateProof(playerNumber)
@@ -254,26 +267,38 @@ export const Table: React.FC<IProps> = ({
             </div>
             <div
               className={` row-start-1 pt-10  w-fit ${
-                loading ? "opacity-60" : "opacity-20"
+                isLoading ? "opacity-60" : "opacity-20"
               } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
             >
               <Image
-                className={`${loading ? "animate-spin " : ""} `}
+                className={`${isLoading ? "animate-spin " : ""} `}
                 src={"/logo.svg"}
-                width={loading ? 90 : 56}
+                width={isLoading ? 90 : 56}
                 height={89}
                 layout={"fixed"}
               />
             </div>
-            <div className="relative -z-10 bottom-8 ml-6">
-              <Image
-                className="opacity-30"
-                src={"/text.svg"}
-                width={581}
-                height={131}
-                layout="fixed"
-              />
-            </div>
+            {!isLoading ? (
+              <div className="relative -z-10 bottom-8 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/text.svg"}
+                  width={581}
+                  height={131}
+                  layout="fixed"
+                />
+              </div>
+            ) : (
+              <div className="relative -z-10 bottom-8 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/final.svg"}
+                  width={664}
+                  height={155}
+                  layout="fixed"
+                />
+              </div>
+            )}
           </div>
           <div className="col-start-1 col-span-3 bottom-14 row-start-2 flex justify-evenly relative ">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center    md:mb-20">
@@ -388,7 +413,8 @@ export const Table: React.FC<IProps> = ({
               score={score}
               isSinglePlayer={isSinglePlayer}
               playerTwo={playerTwo}
-              roundText={roundText}
+              playerOneRound={playerOneRound}
+              // playerTwoRound={playerTwoRound}
               playerOne={playerOne}
             />{" "}
           </div>
@@ -494,13 +520,13 @@ export const Table: React.FC<IProps> = ({
             </div>
             <div
               className={` row-start-1 pt-10  w-fit ${
-                loading ? "opacity-60" : "opacity-20"
+                isLoading ? "opacity-60" : "opacity-20"
               } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
             >
               <Image
-                className={`${loading ? "animate-spin " : ""} `}
+                className={`${isLoading ? "animate-spin " : ""} `}
                 src={"/logo.svg"}
-                width={loading ? 90 : 56}
+                width={isLoading ? 90 : 56}
                 height={89}
                 layout={"fixed"}
               />
@@ -921,7 +947,8 @@ export const Table: React.FC<IProps> = ({
               score={score}
               isSinglePlayer={isSinglePlayer}
               playerTwo={playerTwo}
-              roundText={roundText} // for each player
+              playerOneRound={playerOneRound}
+              playerTwoRound={playerTwoRound}
               playerOne={playerOne}
             />{" "}
           </div>

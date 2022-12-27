@@ -1,18 +1,20 @@
 import React, { useEffect } from "react"
 import truncateEthAddress from "truncate-eth-address"
-import { RoundResult, Score } from "./Game"
+import { Score } from "./Game"
 
 interface IProps {
   playerOne: string
-  roundText: RoundResult
   playerTwo: string
   isSinglePlayer: boolean
   score: Score
+  playerOneRound: string[]
+  playerTwoRound?: string[]
 }
 
 export const Scoreboard: React.FC<IProps> = ({
   playerOne,
-  roundText,
+  playerOneRound,
+  playerTwoRound,
   isSinglePlayer,
   playerTwo,
   score,
@@ -32,8 +34,8 @@ export const Scoreboard: React.FC<IProps> = ({
           {playerOne ? truncateEthAddress(playerOne) : "Player 1"}
         </h1>
         <div className="mt-2 flex flex-col h-full">
-          {roundText
-            ? roundText.playerOne.map((round: string, index: number) => {
+          {playerOneRound!
+            ? playerOneRound!.map((round: string, index: number) => {
                 return (
                   <h1 className="" key={index}>
                     {round}
@@ -45,10 +47,10 @@ export const Scoreboard: React.FC<IProps> = ({
       </div>
       <div
         className={`row-start-4 ${
-          roundText.playerOne.length >= 10 ? "top-40" : "top-28"
+          playerOneRound && playerOneRound!.length >= 10 ? "top-40" : "top-28"
         } relative`}
       >
-        {roundText.playerOne.length > 0 && (
+        {playerOneRound && playerOneRound!.length > 0 && (
           <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
         )}
       </div>
@@ -58,8 +60,8 @@ export const Scoreboard: React.FC<IProps> = ({
             {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
           </h1>
           <div className="mt-2">
-            {roundText
-              ? roundText.playerTwo.map((round: string, index: number) => {
+            {playerTwoRound!
+              ? playerTwoRound!.map((round: string, index: number) => {
                   return (
                     <h1 className="" key={index}>
                       {round}
