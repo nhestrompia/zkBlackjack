@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import io, { Socket } from "socket.io-client"
+import { constructDeck } from "../utils/constructDeck"
 // import { SOCKET_URL } from "../config/default";
 // import EVENTS from "../config/events";
 
@@ -181,7 +182,16 @@ function SocketsProvider(props: any) {
 
     if (deckData.length >= 4) {
       // setRoundText([])
-
+      setSums({
+        playerOneSum: 0,
+        playerTwoSum: 0,
+        houseSum: 0,
+      })
+      setCards({
+        playerOneCards: [],
+        playerTwoCards: [],
+        houseCards: [],
+      })
       setAces({
         playerOneAces: 0,
         playerTwoAces: 0,
@@ -275,8 +285,8 @@ function SocketsProvider(props: any) {
       }))
       setSums((prevSums) => ({
         ...prevSums,
-        playerOneSum: prevSums.playerOneSum + playerOneValue,
-        playerTwoSum: prevSums.playerTwoSum + playerTwoValue,
+        playerOneSum: playerOneValue,
+        playerTwoSum: playerTwoValue,
       }))
       setStartDeck(usedDeck)
 
@@ -286,12 +296,10 @@ function SocketsProvider(props: any) {
       // setPlayerTwoSum(playerTwoValue)
 
       const emitData = {
-        playerOneCards: playerOneCurrentCards,
-        playerTwoCards: playerTwoCurrentCards,
-        playerOneSum: sums.playerOneSum,
-        playerTwoSum: sums.playerTwoSum,
-        houseSum: sums.houseSum,
-        houseCards: housecurrentCards,
+        deck: usedDeck,
+        cards: cards,
+        sums: sums,
+        aces: aces,
       }
 
       socket.emit("card_dealt", emitData)
@@ -331,63 +339,38 @@ function SocketsProvider(props: any) {
   useEffect(() => {
     socket.on("new_player", (data) => {
       // setStartDeck(data.deckData)
-      // setCards({
-      //   playerOneCards: data.player1.cards,
-      //   playerTwoCards: data.player2.cards,
-      //   houseCards: data.house.cards,
-      // })
-      // setSums({
-      //   playerOneSum: data.player1.sum,
-      //   playerTwoSum: data.player1.sum,
-      //   houseSum: data.house.sum,
-      // })
-      // setAces({
-      //   playerOneAces: data.player1.aces,
-      //   playerTwoAces: data.player2.aces,
-      //   houseAces: data.house.aces,
-      // })
-      setDeckData({
-        room: data.room,
-        deckCards: data.deckData,
-        house: {
-          cards: data.house.cards,
-          sum: data.house.sum,
-          aces: data.house.aces,
-        },
-        player1: {
-          cards: data.player1.cards,
-          sum: data.player1.sum,
-          aces: data.player1.aces,
-        },
-        player2: {
-          cards: data.player2.cards,
-          sum: data.player2.sum,
-          aces: data.player2.aces,
-        },
-      })
+      const newDeck = constructDeck()
+      dealCards(newDeck)
+      console.log("data", data)
+      console.log("socket deck", newDeck)
+
       // dealCards(data)
       // setIsGameStarted(true)
       setIsGameActive(true)
     })
 
-    socket.on("got_card", (data) => {
-      setDeckData((prevState) => ({
-        ...prevState,
-        deckCards: data.deckData,
-        player1: {
-          cards: data.player1.cards,
-          sum: data.player1.sum,
-          aces: data.player1.aces,
-        },
-        player2: {
-          cards: data.player2.cards,
-          sum: data.player2.sum,
-          aces: data.player2.aces,
-        },
-      }))
-    })
+    // socket.on("got_card", (data) => {
+    //   setDeckData((prevState) => ({
+    //     ...prevState,
+    //     deckCards: data.deckData,
+    //     player1: {
+    //       cards: data.player1.cards,
+    //       sum: data.player1.sum,
+    //       aces: data.player1.aces,
+    //     },
+    //     player2: {
+    //       cards: data.player2.cards,
+    //       sum: data.player2.sum,
+    //       aces: data.player2.aces,
+    //     },
+    //   }))
+    // })
 
     socket.on("current_deck", (data) => {
+      setCards(data.cards)
+      setSums(data.sums)
+      setAces(data.aces)
+      setStartDeck(data.deck)
       // setStartDeck(data.deck)
       // setCards({
       //   playerOneCards: data.playerOneCards,

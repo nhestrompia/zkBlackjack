@@ -94,6 +94,8 @@ const Home: NextPage<IProps> = ({
         }
         socket.emit("join_room", sendData)
         setIsGameActive(true)
+        setIsSinglePlayer(false)
+
         router.push(`/room/${data}`)
       }
     } catch (error) {
@@ -132,7 +134,7 @@ const Home: NextPage<IProps> = ({
 
       socket.emit("create_room", gameRoom.toString())
       setIsGameActive(true)
-
+      setIsSinglePlayer(false)
       router.push(`/room/${gameRoom}`)
     } catch (err) {
       console.error(err)
@@ -187,20 +189,37 @@ const Home: NextPage<IProps> = ({
       <main className="bg-[#144b1e]  pb-1 text-white">
         <nav className="px-8 md:px-2 fixed w-full z-20 top-0 left-0 py-3.5    "></nav>
         {isLoading ? (
-          <div className="flex justify-center  relative top-64 left-0 z-20 ">
-            <svg
-              width="36"
-              height="36"
-              fill="#fff"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <ellipse className="spinner_rXNP" cx="12" cy="5" rx="4" ry="4" />
-            </svg>
+          <div className="flex justify-center flex-row  relative top-64 left-0 z-20">
+            <div className=" absolute top-12 left-1/2">
+              <svg
+                width="36"
+                height="36"
+                fill="#fff"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <ellipse
+                  className="spinner_rXNP"
+                  cx="12"
+                  cy="5"
+                  rx="4"
+                  ry="4"
+                />
+              </svg>
+            </div>
+            {/* <div className="relative -z-10 top-24 ml-6">
+              <Image
+                className="opacity-30"
+                src={"/game.svg"}
+                width={664}
+                height={155}
+                layout="fixed"
+              />
+            </div> */}
           </div>
         ) : (
           <div className="grid items-center justify-center grid-cols-3 mt-20 lg:mt-8">
-            {/* <div className="flex items-center justify-center col-start-1 mx-auto w-fit">
+            <div className="flex items-center justify-center col-start-1 mx-auto w-fit">
               <button
                 onClick={startSinglePlayer}
                 className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
@@ -212,13 +231,13 @@ const Home: NextPage<IProps> = ({
                   layout={"fixed"}
                 />
               </button>
-            </div> */}
+            </div>
             <div className="flex items-center justify-center col-start-2">
               <Rules />
             </div>
             <div className="flex flex-col items-center justify-center gap-10 mx-auto w-fit">
               <button
-                onClick={startSinglePlayer}
+                onClick={createRoom}
                 className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
                 <Image
@@ -228,20 +247,20 @@ const Home: NextPage<IProps> = ({
                   layout={"fixed"}
                 />
               </button>
-              {/* <button
-                  onClick={() => {
-                    setIsJoin(true)
-                    setIsModalOpen(true)
-                  }}
-                  className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
-                >
-                  <Image
-                    src={"/join.svg"}
-                    width={120}
-                    height={120}
-                    layout={"fixed"}
-                  />
-                </button> */}
+              <button
+                onClick={() => {
+                  setIsJoin(true)
+                  setIsModalOpen(true)
+                }}
+                className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
+              >
+                <Image
+                  src={"/join.svg"}
+                  width={120}
+                  height={120}
+                  layout={"fixed"}
+                />
+              </button>
             </div>
             <Modal
               // setIsGameStarted={setIsGameStarted}

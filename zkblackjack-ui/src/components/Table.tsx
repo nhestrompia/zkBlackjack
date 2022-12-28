@@ -193,7 +193,7 @@ export const Table: React.FC<IProps> = ({
     } else {
       setPlayerOne(account)
     }
-  }, [deckData, isSinglePlayer])
+  }, [cards, isSinglePlayer])
 
   if (isSinglePlayer) {
     return (

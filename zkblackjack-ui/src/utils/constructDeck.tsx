@@ -18,14 +18,6 @@ export const constructDeck = () => {
   ]
   const cardTypes: string[] = ["D", "C", "H", "S"]
 
-  // if (isSinglePlayer) {
-  //   for (let i = 0; i < cardTypes.length; i++) {
-  //     for (let j = 0; j < cardValues.length; j++) {
-  //       deck.push(cardValues[j] + "-" + cardTypes[i])
-  //     }
-  //   }
-  // }
-
   for (let i = 0; i < 2; i++) {
     for (let i = 0; i < cardTypes.length; i++) {
       for (let j = 0; j < cardValues.length; j++) {
