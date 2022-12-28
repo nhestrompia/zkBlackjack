@@ -240,7 +240,7 @@ function SocketsProvider(props: any) {
       // setHouseSum((prevState: number) => prevState + houseValue)
       setSums((prevSums) => ({
         ...prevSums,
-        houseSum: prevSums.houseSum + houseValue,
+        houseSum: houseValue,
       }))
       setCards((prevCards) => ({ ...prevCards, houseCards: housecurrentCards }))
 
@@ -336,6 +336,8 @@ function SocketsProvider(props: any) {
   //   }
   // }, [])
 
+  console.log("cards", cards)
+
   useEffect(() => {
     socket.on("new_player", (data) => {
       // setStartDeck(data.deckData)
@@ -343,7 +345,7 @@ function SocketsProvider(props: any) {
       dealCards(newDeck)
       console.log("data", data)
       console.log("socket deck", newDeck)
-
+      setIsSinglePlayer(false)
       // dealCards(data)
       // setIsGameStarted(true)
       setIsGameActive(true)
@@ -367,6 +369,7 @@ function SocketsProvider(props: any) {
     // })
 
     socket.on("current_deck", (data) => {
+      setIsSinglePlayer(false)
       setCards(data.cards)
       setSums(data.sums)
       setAces(data.aces)

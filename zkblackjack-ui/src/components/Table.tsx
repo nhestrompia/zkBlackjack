@@ -21,7 +21,7 @@ interface IProps {
   room?: string
   isLoading: boolean
   isGameEnded: boolean
-  isSinglePlayer: boolean
+  // isSinglePlayer: boolean
   currentDeck?: string[]
   calculateProof: (val: string) => void
   // getCard: (val: string[]) => void
@@ -94,7 +94,7 @@ export const Table: React.FC<IProps> = ({
   isCanWithdraw,
   score,
   getCard,
-  isSinglePlayer,
+  // isSinglePlayer,
   isGameEnded,
   // unlockBet,
   withdrawBet,
@@ -103,8 +103,15 @@ export const Table: React.FC<IProps> = ({
 }) => {
   const [playerTwo, setPlayerTwo] = useState("")
   const [playerOne, setPlayerOne] = useState("")
-  const { socket, startDeck, cards, deckData, isGameActive, setIsGameActive } =
-    useSockets()
+  const {
+    socket,
+    startDeck,
+    cards,
+    deckData,
+    isSinglePlayer,
+    isGameActive,
+    setIsGameActive,
+  } = useSockets()
   // const handleClick = () => {
   //   dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
   // }
@@ -151,7 +158,7 @@ export const Table: React.FC<IProps> = ({
     )
 
     const tx = await blackjackContract.withdrawSafe(
-      ethers.utils.parseEther("0.15")
+      ethers.utils.parseEther("0.5")
     )
   }
   const checkVerifier = async () => {
@@ -194,6 +201,8 @@ export const Table: React.FC<IProps> = ({
       setPlayerOne(account)
     }
   }, [cards, isSinglePlayer])
+
+  console.log("is single", isSinglePlayer)
 
   if (isSinglePlayer) {
     return (
@@ -431,7 +440,7 @@ export const Table: React.FC<IProps> = ({
                   layout="fixed"
                 />
               </button>
-              {/* <button onClick={withdrawSafe}>Start</button> */}
+              <button onClick={withdrawSafe}>Start</button>
               <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
                 <Image
                   onClick={() => getCard!(currentDeck!)}
@@ -481,13 +490,16 @@ export const Table: React.FC<IProps> = ({
                 layout="fixed"
               />
             </div> */}
-              {deckData.house.cards.length > 0 ? (
-                deckData.house.cards.map((card, index) => {
+              {cards.houseCards.length > 0 ? (
+                cards.houseCards.map((card, index) => {
                   if (index === 0) {
                     return (
-                      <div className="-ml-[8rem] mt-0.5 md:-ml-[12rem]">
+                      <div
+                        key={card}
+                        className="-ml-[8rem] mt-0.5 md:-ml-[12rem]"
+                      >
                         <Image
-                          src={deckData.house.cards[0]!}
+                          src={card}
                           width={135}
                           height={140}
                           layout="fixed"
@@ -496,7 +508,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div className="z-10">
+                      <div key={card} className="z-10">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -603,8 +615,8 @@ export const Table: React.FC<IProps> = ({
             </h1> */}
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               {account && account === playerTwo ? (
-                deckData.player2.cards.length > 0 ? (
-                  deckData.player2.cards.map((card, index) => {
+                cards.playerTwoCards.length > 0 ? (
+                  cards.playerTwoCards.map((card, index) => {
                     if (index === 0) {
                       return (
                         <div
@@ -623,10 +635,8 @@ export const Table: React.FC<IProps> = ({
                       if (account === playerOne) {
                         return (
                           <div
-                            className={` 
-  -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
+                            className={` "-ml-[8rem]  md:-ml-[8rem]" 
+                              flex gap-6  relative left-20`}
                           >
                             <Image
                               src={"/cards/back.svg"}
@@ -640,8 +650,8 @@ export const Table: React.FC<IProps> = ({
                       } else if (account === playerTwo) {
                         return (
                           <div
-                            className={` 
-     mt-[2px]  relative left-20 `}
+                            className={` "-ml-[8rem]  md:-ml-[8rem]" 
+                            flex gap-6  relative left-20`}
                           >
                             <Image
                               // src={"/cards/back.svg"}
@@ -684,8 +694,8 @@ export const Table: React.FC<IProps> = ({
                     </div>
                   </div>
                 )
-              ) : deckData.player1.cards.length > 0 ? (
-                deckData.player1.cards.map((card, index) => {
+              ) : cards.playerOneCards.length > 0 ? (
+                cards.playerOneCards.map((card, index) => {
                   if (index === 0) {
                     return (
                       <div key={card} className=" relative left-[38px] mt-0.5 ">
@@ -776,8 +786,8 @@ export const Table: React.FC<IProps> = ({
 
             } */}
               {account && account === playerTwo ? (
-                deckData.player1.cards.length > 0 ? (
-                  deckData.player1.cards.map((card, index) => {
+                cards.playerOneCards.length > 0 ? (
+                  cards.playerOneCards.map((card, index) => {
                     if (index === 0) {
                       return (
                         <div
@@ -795,6 +805,7 @@ export const Table: React.FC<IProps> = ({
                     } else {
                       return (
                         <div
+                          key={card}
                           className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
@@ -840,8 +851,8 @@ export const Table: React.FC<IProps> = ({
                     </div>
                   </div>
                 )
-              ) : deckData.player2.cards.length > 0 ? (
-                deckData.player2.cards.map((card, index) => {
+              ) : cards.playerTwoCards.length > 0 ? (
+                cards.playerTwoCards.map((card, index) => {
                   if (index === 0) {
                     return (
                       <div key={card} className=" relative left-[38px] mt-0.5 ">
@@ -856,6 +867,7 @@ export const Table: React.FC<IProps> = ({
                   } else {
                     return (
                       <div
+                        key={card}
                         className={` 
   -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
     account ? "left-[77px]" : "left-[52px]"
@@ -964,7 +976,9 @@ export const Table: React.FC<IProps> = ({
                 layout="fixed"
               />
             </button>
-            <button onClick={checkVerifier}>Start</button>
+            <button className=" p-4 text-white" onClick={withdrawSafe}>
+              Start
+            </button>
             <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
               <Image
                 onClick={hitMe}

@@ -4,16 +4,23 @@ const http = require("http")
 const { Server } = require("socket.io")
 const cors = require("cors")
 
-app.use(cors())
+// app.use(cors())
 
-const server = http.createServer(app)
+// const server = http.createServer(app)
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-})
+// const io = new Server(server, {
+//   cors: {
+//     origin: ["*", "http://localhost:3000"],
+//     methods: ["GET", "POST"],
+//   },
+// })
+
+const server = require("http").createServer()
+options = {
+  cors: true,
+  origins: ["*", "http://localhost:3000"],
+}
+const io = require("socket.io")(server, options)
 
 // let roomInfo = []
 

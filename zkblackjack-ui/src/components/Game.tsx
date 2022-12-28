@@ -530,7 +530,7 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     checkAce()
-  }, [sums.playerOneSum])
+  }, [sums])
 
   const dealCards = (deckData: string[]) => {
     let usedDeck: string[] = deckData
@@ -941,7 +941,6 @@ export const Game: React.FC<IProps> = ({
     <div className="h-fit">
       <Table
         isGameEnded={isGameEnded}
-        isSinglePlayer={true}
         getCard={getCard}
         library={library}
         account={account}
