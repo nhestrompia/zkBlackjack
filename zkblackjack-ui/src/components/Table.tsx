@@ -27,7 +27,7 @@ interface IProps {
   // getCard: (val: string[]) => void
 
   library: ethers.providers.Web3Provider
-  getCard?: (val: string[]) => void
+  getCard?: (val: string[], player: string) => void
   playerOneRound: string[]
   playerTwoRound: string[]
 
@@ -140,7 +140,7 @@ export const Table: React.FC<IProps> = ({
     }
 
     const sendData = {
-      deck: deckData.deckCards,
+      deck: startDeck,
       player: playerNumber,
       room: room,
     }
@@ -443,7 +443,7 @@ export const Table: React.FC<IProps> = ({
               <button onClick={withdrawSafe}>Start</button>
               <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
                 <Image
-                  onClick={() => getCard!(currentDeck!)}
+                  onClick={() => getCard!(currentDeck!, "1")}
                   src={"/hit.svg"}
                   width={120}
                   height={120}

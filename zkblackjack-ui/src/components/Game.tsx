@@ -494,40 +494,118 @@ export const Game: React.FC<IProps> = ({
     return deck
   }
 
-  const getCard = (deckData: string[]) => {
-    if (sums.playerOneSum >= 21) {
-      toast.error("You can't get more cards", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-      })
-    } else {
-      const tempDeck = deckData
-      let playerValue = 0
-      const playerCard = tempDeck.pop()
-      const cardImage = `/cards/${playerCard}.svg`
-      const value = getValue(playerCard!)
-      playerValue += value!
-      if (value == 11) {
-        setAces((prevState: Ace) => ({
+  const getCard = (deckData: string[], player: string) => {
+    if (isSinglePlayer) {
+      if (sums.playerOneSum >= 21) {
+        toast.error("You can't get more cards", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+        })
+      } else {
+        const tempDeck = deckData
+        let playerValue = 0
+        const playerCard = tempDeck.pop()
+        const cardImage = `/cards/${playerCard}.svg`
+        const value = getValue(playerCard!)
+        playerValue += value!
+        if (value == 11) {
+          setAces((prevState: Ace) => ({
+            ...prevState,
+            playerOneAces: prevState.playerOneAces + 1,
+          }))
+        }
+        setCards((prevState: Card) => ({
           ...prevState,
-          playerOneAces: prevState.playerOneAces + 1,
+          playerOneCards: [...prevState.playerOneCards, cardImage],
         }))
-      }
-      setCards((prevState: Card) => ({
-        ...prevState,
-        playerOneCards: [...prevState.playerOneCards, cardImage],
-      }))
 
-      setSums((prevState: Sum) => ({
-        ...prevState,
-        playerOneSum: prevState.playerOneSum + playerValue,
-      }))
-      setCurrentDeck(tempDeck)
+        setSums((prevState: Sum) => ({
+          ...prevState,
+          playerOneSum: prevState.playerOneSum + playerValue,
+        }))
+        setCurrentDeck(tempDeck)
+      }
+    } else {
+      if (player === "1") {
+        if (sums.playerOneSum >= 21) {
+          toast.error("You can't get more cards", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+          })
+          return { startDeck }
+        } else {
+          const tempDeck = deckData
+          let playerValue = 0
+          const playerCard = tempDeck.pop()
+          const cardImage = `/cards/${playerCard}.svg`
+          const value = getValue(playerCard!)
+          playerValue += value!
+          if (value == 11) {
+            setAces((prevState: Ace) => ({
+              ...prevState,
+              playerOneAces: prevState.playerOneAces + 1,
+            }))
+          }
+          setCards((prevState: Card) => ({
+            ...prevState,
+            playerOneCards: [...prevState.playerOneCards, cardImage],
+          }))
+
+          setSums((prevState: Sum) => ({
+            ...prevState,
+            playerOneSum: prevState.playerOneSum + playerValue,
+          }))
+          setCurrentDeck(tempDeck)
+          return {
+            tempDeck,
+          }
+        }
+      } else {
+        if (sums.playerTwoSum >= 21) {
+          toast.error("You can't get more cards", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+          })
+        } else {
+          const tempDeck = deckData
+          let playerValue = 0
+          const playerCard = tempDeck.pop()
+          const cardImage = `/cards/${playerCard}.svg`
+          const value = getValue(playerCard!)
+          playerValue += value!
+          if (value == 11) {
+            setAces((prevState: Ace) => ({
+              ...prevState,
+              playerTwoAces: prevState.playerTwoAces + 1,
+            }))
+          }
+          setCards((prevState: Card) => ({
+            ...prevState,
+            playerTwoCards: [...prevState.playerTwoCards, cardImage],
+          }))
+
+          setSums((prevState: Sum) => ({
+            ...prevState,
+            playerTwoSum: prevState.playerTwoSum + playerValue,
+          }))
+          setCurrentDeck(tempDeck)
+        }
+      }
     }
   }
 
