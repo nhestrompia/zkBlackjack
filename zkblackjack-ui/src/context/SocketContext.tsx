@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import io, { Socket } from "socket.io-client"
-import { constructDeck } from "../utils/constructDeck"
 // import { SOCKET_URL } from "../config/default";
 // import EVENTS from "../config/events";
 
@@ -177,25 +176,35 @@ function SocketsProvider(props: any) {
     }
   }
 
+  //   useEffect(() => {
+  //   if (!socket) {
+  //     setSocket(io("http://localhost:3001"))
+  //   }
+
+  //   return () => {
+  //     socket?.disconnect()
+  //   }
+  // }, [])
   const dealCards = (deckData: string[]) => {
     let usedDeck: string[] = deckData
 
     if (deckData.length >= 4) {
       // setRoundText([])
-      setSums({
-        playerOneSum: 0,
-        playerTwoSum: 0,
-        houseSum: 0,
+
+      setAces({
+        playerOneAces: 0,
+        playerTwoAces: 0,
+        houseAces: 0,
       })
       setCards({
         playerOneCards: [],
         playerTwoCards: [],
         houseCards: [],
       })
-      setAces({
-        playerOneAces: 0,
-        playerTwoAces: 0,
-        houseAces: 0,
+      setSums({
+        playerOneSum: 0,
+        playerTwoSum: 0,
+        houseSum: 0,
       })
 
       // setIsStand(false)
@@ -211,7 +220,7 @@ function SocketsProvider(props: any) {
         housecurrentCards.push(cardImage)
         if (value == 11) {
           // setAces({...aces, houseAces : aces.houseAces + 1})
-          setAces((prevAces) => ({
+          setAces((prevAces: any) => ({
             ...prevAces,
             houseAces: prevAces.houseAces + 1,
           }))
@@ -228,7 +237,7 @@ function SocketsProvider(props: any) {
 
         const value = getValue(dealerCard!)
         if (value == 11) {
-          setAces((prevAces) => ({
+          setAces((prevAces: any) => ({
             ...prevAces,
             houseAces: prevAces.houseAces + 1,
           }))
@@ -237,19 +246,18 @@ function SocketsProvider(props: any) {
         houseValue += value!
       }
 
-      // setHouseSum((prevState: number) => prevState + houseValue)
-      setSums((prevSums) => ({
+      setSums((prevSums: any) => ({
         ...prevSums,
-        houseSum: houseValue,
+        houseSum: prevSums.houseSum + houseValue,
       }))
-      setCards((prevCards) => ({ ...prevCards, houseCards: housecurrentCards }))
-
-      // setHouseCards(housecurrentCards)
+      setCards((prevCards: any) => ({
+        ...prevCards,
+        houseCards: housecurrentCards,
+      }))
 
       let playerOneValue = 0
-      let playerTwoValue = 0
+
       const playerOneCurrentCards: string[] = []
-      const playerTwoCurrentCards: string[] = []
 
       for (let i = 0; i < 2; i++) {
         const playerCard = usedDeck.pop()
@@ -259,50 +267,22 @@ function SocketsProvider(props: any) {
         playerOneValue += value!
         if (value == 11) {
           // setAceNumberPlayerOne((prevState) => prevState + 1)
-          setAces((prevAces) => ({
+          setAces((prevAces: any) => ({
             ...prevAces,
             playerOneAces: prevAces.playerOneAces + 1,
           }))
         }
       }
-      for (let i = 0; i < 2; i++) {
-        const playerCard = usedDeck.pop()
-        const cardImage = `/cards/${playerCard}.svg`
-        playerTwoCurrentCards.push(cardImage)
-        const value = getValue(playerCard!)
-        playerTwoValue += value!
-        if (value == 11) {
-          setAces((prevAces) => ({
-            ...prevAces,
-            playerTwoAces: prevAces.playerTwoAces + 1,
-          }))
-        }
-      }
-      setCards((prevCards) => ({
+
+      setCards((prevCards: any) => ({
         ...prevCards,
         playerOneCards: playerOneCurrentCards,
-        playerTwoCards: playerTwoCurrentCards,
       }))
-      setSums((prevSums) => ({
+      setSums((prevSums: any) => ({
         ...prevSums,
-        playerOneSum: playerOneValue,
-        playerTwoSum: playerTwoValue,
+        playerOneSum: prevSums.playerOneSum + playerOneValue,
       }))
       setStartDeck(usedDeck)
-
-      // setPlayerOneCards(playerOneCurrentCards)
-      // setPlayerOneSum(playerOneValue)
-      // setPlayerTwoCards(playerTwoCurrentCards)
-      // setPlayerTwoSum(playerTwoValue)
-
-      const emitData = {
-        deck: usedDeck,
-        cards: cards,
-        sums: sums,
-        aces: aces,
-      }
-
-      socket.emit("card_dealt", emitData)
 
       if (
         deckData.length <= 4 &&
@@ -322,19 +302,59 @@ function SocketsProvider(props: any) {
         // })
       }
     } else {
-      // setIsGameActive(false)
+      // toast.error("No more cards left. This is the final round!", {
+      //   position: "top-center",
+      //   autoClose: 3000,
+      //   hideProgressBar: true,
+      //   closeOnClick: true,
+      //   pauseOnHover: false,
+      //   draggable: true,
+      //   progress: undefined,
+      // })
+      setIsGameActive(false)
+      // setIsGameEnded(true)
     }
   }
 
-  //   useEffect(() => {
-  //   if (!socket) {
-  //     setSocket(io("http://localhost:3001"))
-  //   }
+  const constructDeck = () => {
+    console.log("here utils")
 
-  //   return () => {
-  //     socket?.disconnect()
-  //   }
-  // }, [])
+    let deck: string[] = []
+
+    const cardValues: string[] = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ]
+    const cardTypes: string[] = ["D", "C", "H", "S"]
+
+    for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < cardTypes.length; i++) {
+        for (let j = 0; j < cardValues.length; j++) {
+          deck.push(cardValues[j] + "-" + cardTypes[i])
+        }
+      }
+    }
+
+    for (let i = 0; i < deck.length; i++) {
+      const randomNumber = Math.floor(Math.random() * deck.length)
+      const currentCard = deck[i]
+      deck[i] = deck[randomNumber] ?? ""
+      deck[randomNumber] = currentCard ?? ""
+    }
+
+    return deck
+  }
 
   console.log("cards", cards)
 
@@ -342,7 +362,23 @@ function SocketsProvider(props: any) {
     socket.on("new_player", (data) => {
       // setStartDeck(data.deckData)
       const newDeck = constructDeck()
+      console.log("here? cont")
+
       dealCards(newDeck)
+      setIsSinglePlayer(false)
+      // setCards(data.cards)
+      // setSums(data.sums)
+      // setAces(data.aces)
+      // setStartDeck(data.deck)
+
+      const emitData = {
+        deck: startDeck,
+        cards: cards,
+        sums: sums,
+        aces: aces,
+      }
+
+      socket.emit("card_dealt", emitData)
       console.log("data", data)
       console.log("socket deck", newDeck)
       setIsSinglePlayer(false)
@@ -369,12 +405,10 @@ function SocketsProvider(props: any) {
     // })
 
     socket.on("current_deck", (data) => {
-      setIsSinglePlayer(false)
       setCards(data.cards)
       setSums(data.sums)
       setAces(data.aces)
       setStartDeck(data.deck)
-      // setStartDeck(data.deck)
       // setCards({
       //   playerOneCards: data.playerOneCards,
       //   playerTwoCards: data.playerTwoCards,

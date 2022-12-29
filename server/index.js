@@ -255,7 +255,10 @@ const io = require("socket.io")(server, options)
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`)
   socket.on("join_room", (data) => {
-    console.log(`User with ID: ${socket.id} joined room: ${data.room}`)
+    console.log(
+      `User with ID: ${socket.id} joined room: ${data.room}`,
+      typeof data.room
+    )
     socket.join(data.room)
     // socket.to(data.room).emit("player_joined", data.deck)
     // console.log("data emitted")
@@ -270,6 +273,8 @@ io.on("connection", (socket) => {
 
     // console.log(data.deck, "data emitted2")
     // console.log("roomInfo", currentRoom)
+    console.log("data new", data)
+
     io.in(data.room).emit("new_player", data)
 
     // socket.to(data.room).emit("new_player", data.deck)
@@ -278,7 +283,10 @@ io.on("connection", (socket) => {
   })
 
   socket.on("create_room", (data) => {
-    console.log(`User with ID: ${socket.id} created room: ${data}`)
+    console.log(
+      `User with ID: ${socket.id} created room: ${data} `,
+      typeof data
+    )
     // console.log("userList", roomInfo)
     socket.join(data)
   })
@@ -299,6 +307,7 @@ io.on("connection", (socket) => {
   // })
 
   socket.on("card_dealt", (data) => {
+    console.log("data dealt", data)
     io.in(data.room).emit("current_deck", data)
   })
 

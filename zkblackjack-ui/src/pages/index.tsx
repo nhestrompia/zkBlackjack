@@ -7,7 +7,7 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { constructDeck } from "../utils/constructDeck"
+// import { constructDeck } from "../utils/constructDeck"
 import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,
@@ -225,7 +225,7 @@ const Home: NextPage<IProps> = ({
                 className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
                 <Image
-                  src={"/start.svg"}
+                  src={"/single.svg"}
                   width={120}
                   height={120}
                   layout={"fixed"}

@@ -93,6 +93,8 @@ export const Game: React.FC<IProps> = ({
 
       if (isSinglePlayer) {
         const firstDeck = constructDeck()
+        console.log("here?")
+
         dealCards(firstDeck)
       }
     }
@@ -448,6 +450,7 @@ export const Game: React.FC<IProps> = ({
   }
 
   const constructDeck = () => {
+    console.log("here")
     const cardValues: string[] = [
       "2",
       "3",
@@ -838,6 +841,7 @@ export const Game: React.FC<IProps> = ({
 
         // unlockBet(account, "1")
       } else {
+        console.log("here?")
         dealCards(currentDeck)
       }
     } else {
