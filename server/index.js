@@ -306,7 +306,7 @@ io.on("connection", (socket) => {
   //   socket.to(data.room).emit("new_player", data.deck)
   // })
 
-  socket.on("card_dealt", (data) => {
+  socket.once("card_dealt", (data) => {
     console.log("data dealt", data)
     io.in(data.room).emit("current_deck", data)
   })

@@ -18,7 +18,6 @@ import { BigNumber, Contract, ethers, providers, utils } from "ethers"
 import Rules from "../components/Rules"
 import { Modal } from "../components/Modal"
 import { useSockets } from "../context/SocketContext"
-import { boolean } from "zod"
 
 interface IProps {
   library: ethers.providers.Web3Provider
@@ -46,6 +45,7 @@ const Home: NextPage<IProps> = ({
   const {
     socket,
     dealCards,
+
     startDeck,
     isGameActive,
     setIsGameActive,
@@ -60,9 +60,53 @@ const Home: NextPage<IProps> = ({
     setIsSinglePlayer(false)
   }, [])
 
+  console.log("index", cards)
+
+  const constructDeck = () => {
+    console.log("here utils")
+
+    let deck: string[] = []
+
+    const cardValues: string[] = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ]
+    const cardTypes: string[] = ["D", "C", "H", "S"]
+
+    for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < cardTypes.length; i++) {
+        for (let j = 0; j < cardValues.length; j++) {
+          deck.push(cardValues[j] + "-" + cardTypes[i])
+        }
+      }
+    }
+
+    for (let i = 0; i < deck.length; i++) {
+      const randomNumber = Math.floor(Math.random() * deck.length)
+      const currentCard = deck[i]
+      deck[i] = deck[randomNumber] ?? ""
+      deck[randomNumber] = currentCard ?? ""
+    }
+
+    return deck
+  }
+
   const joinRoom = async (data: any) => {
     try {
       setIsLoading(true)
+      const tempDeck = constructDeck()
+
       const signer = library?.getSigner()
 
       const blackjackContract = new Contract(
@@ -88,10 +132,43 @@ const Home: NextPage<IProps> = ({
           }
         )
         const confirmation = await library.waitForTransaction(joinGame.hash)
+        const {
+          usedDeck,
+          aceHouse,
+          acePlayerOne,
+          acePlayerTwo,
+          houseValue,
+          playerOneValue,
+          playerTwoValue,
+          housecurrentCards,
+          playerOneCurrentCards,
+          playerTwoCurrentCards,
+        } = dealCards(tempDeck)
 
         const sendData = {
           room: data,
+          deck: usedDeck,
+          cards: {
+            playerOne: playerOneCurrentCards,
+            playerTwo: playerTwoCurrentCards,
+            house: housecurrentCards,
+          },
+          aces: {
+            playerOne: acePlayerOne,
+            playerTwo: acePlayerTwo,
+            house: aceHouse,
+          },
+          sums: {
+            playerOne: playerOneValue,
+            playerTwo: playerTwoValue,
+            house: houseValue,
+          },
+          // cards: cards,
+          // aces: aces,
+          // sums: sums,
         }
+
+        console.log("send data", sendData)
         socket.emit("join_room", sendData)
         setIsGameActive(true)
         setIsSinglePlayer(false)
@@ -100,6 +177,7 @@ const Home: NextPage<IProps> = ({
       }
     } catch (error) {
       setIsLoading(false)
+      // setCards({})
       console.error(error)
     }
   }

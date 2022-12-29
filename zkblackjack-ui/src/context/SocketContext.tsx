@@ -185,7 +185,140 @@ function SocketsProvider(props: any) {
   //     socket?.disconnect()
   //   }
   // }, [])
+
+  // const dealCards = (deckData: string[]) => {
+  //   let usedDeck: string[] = deckData
+
+  //   if (deckData.length >= 4) {
+  //     // setRoundText([])
+
+  //     setAces({
+  //       playerOneAces: 0,
+  //       playerTwoAces: 0,
+  //       houseAces: 0,
+  //     })
+  //     setCards({
+  //       playerOneCards: [],
+  //       playerTwoCards: [],
+  //       houseCards: [],
+  //     })
+  //     setSums({
+  //       playerOneSum: 0,
+  //       playerTwoSum: 0,
+  //       houseSum: 0,
+  //     })
+
+  //     // setIsStand(false)
+  //     let houseValue = 0
+  //     const housecurrentCards: string[] = []
+  //     for (let i = 0; i < 2; i++) {
+  //       const dealerCard = usedDeck?.pop()
+
+  //       const cardImage = `/cards/${dealerCard}.svg`
+
+  //       const value = getValue(dealerCard!)
+  //       houseValue += value!
+  //       housecurrentCards.push(cardImage)
+  //       if (value == 11) {
+  //         // setAces({...aces, houseAces : aces.houseAces + 1})
+  //         setAces((prevAces: any) => ({
+  //           ...prevAces,
+  //           houseAces: prevAces.houseAces + 1,
+  //         }))
+  //       }
+  //     }
+
+  //     while (houseValue < 17) {
+  //       if (usedDeck.length === 2) {
+  //         break
+  //       }
+  //       const dealerCard = usedDeck.pop()
+  //       const cardImage = `/${dealerCard}.png`
+  //       housecurrentCards.push(cardImage)
+
+  //       const value = getValue(dealerCard!)
+  //       if (value == 11) {
+  //         setAces((prevAces: any) => ({
+  //           ...prevAces,
+  //           houseAces: prevAces.houseAces + 1,
+  //         }))
+  //       }
+
+  //       houseValue += value!
+  //     }
+
+  //     setSums((prevSums: any) => ({
+  //       ...prevSums,
+  //       houseSum: prevSums.houseSum + houseValue,
+  //     }))
+  //     setCards((prevCards: any) => ({
+  //       ...prevCards,
+  //       houseCards: housecurrentCards,
+  //     }))
+
+  //     let playerOneValue = 0
+
+  //     const playerOneCurrentCards: string[] = []
+
+  //     for (let i = 0; i < 2; i++) {
+  //       const playerCard = usedDeck.pop()
+  //       const cardImage = `/cards/${playerCard}.svg`
+  //       playerOneCurrentCards.push(cardImage)
+  //       const value = getValue(playerCard!)
+  //       playerOneValue += value!
+  //       if (value == 11) {
+  //         // setAceNumberPlayerOne((prevState) => prevState + 1)
+  //         setAces((prevAces: any) => ({
+  //           ...prevAces,
+  //           playerOneAces: prevAces.playerOneAces + 1,
+  //         }))
+  //       }
+  //     }
+
+  //     setCards((prevCards: any) => ({
+  //       ...prevCards,
+  //       playerOneCards: playerOneCurrentCards,
+  //     }))
+  //     setSums((prevSums: any) => ({
+  //       ...prevSums,
+  //       playerOneSum: prevSums.playerOneSum + playerOneValue,
+  //     }))
+  //     setStartDeck(usedDeck)
+
+  //     if (
+  //       deckData.length <= 4 &&
+  //       cards.playerOneCards.length < 2 &&
+  //       cards.playerTwoCards.length < 2
+  //     ) {
+  //       // setIsGameActive(false)
+  //       // setIsStand(true)
+  //       // toast.error("No more cards left. This is the final round!", {
+  //       //   position: "top-center",
+  //       //   autoClose: 3000,
+  //       //   hideProgressBar: true,
+  //       //   closeOnClick: true,
+  //       //   pauseOnHover: false,
+  //       //   draggable: true,
+  //       //   progress: undefined,
+  //       // })
+  //     }
+  //   } else {
+  //     // toast.error("No more cards left. This is the final round!", {
+  //     //   position: "top-center",
+  //     //   autoClose: 3000,
+  //     //   hideProgressBar: true,
+  //     //   closeOnClick: true,
+  //     //   pauseOnHover: false,
+  //     //   draggable: true,
+  //     //   progress: undefined,
+  //     // })
+  //     setIsGameActive(false)
+  //     // setIsGameEnded(true)
+  //   }
+  // }
+
   const dealCards = (deckData: string[]) => {
+    console.log("tried")
     let usedDeck: string[] = deckData
 
     if (deckData.length >= 4) {
@@ -207,6 +340,10 @@ function SocketsProvider(props: any) {
         houseSum: 0,
       })
 
+      let aceHouse = 0
+      let acePlayerOne = 0
+      let acePlayerTwo = 0
+
       // setIsStand(false)
       let houseValue = 0
       const housecurrentCards: string[] = []
@@ -220,10 +357,11 @@ function SocketsProvider(props: any) {
         housecurrentCards.push(cardImage)
         if (value == 11) {
           // setAces({...aces, houseAces : aces.houseAces + 1})
-          setAces((prevAces: any) => ({
+          setAces((prevAces: Ace) => ({
             ...prevAces,
             houseAces: prevAces.houseAces + 1,
           }))
+          aceHouse += 1
         }
       }
 
@@ -237,27 +375,21 @@ function SocketsProvider(props: any) {
 
         const value = getValue(dealerCard!)
         if (value == 11) {
-          setAces((prevAces: any) => ({
+          setAces((prevAces: Ace) => ({
             ...prevAces,
             houseAces: prevAces.houseAces + 1,
           }))
+          aceHouse += 1
         }
 
         houseValue += value!
       }
 
-      setSums((prevSums: any) => ({
-        ...prevSums,
-        houseSum: prevSums.houseSum + houseValue,
-      }))
-      setCards((prevCards: any) => ({
-        ...prevCards,
-        houseCards: housecurrentCards,
-      }))
-
       let playerOneValue = 0
+      let playerTwoValue = 0
 
       const playerOneCurrentCards: string[] = []
+      const playerTwoCurrentCards: string[] = []
 
       for (let i = 0; i < 2; i++) {
         const playerCard = usedDeck.pop()
@@ -267,22 +399,54 @@ function SocketsProvider(props: any) {
         playerOneValue += value!
         if (value == 11) {
           // setAceNumberPlayerOne((prevState) => prevState + 1)
-          setAces((prevAces: any) => ({
+          setAces((prevAces: Ace) => ({
             ...prevAces,
             playerOneAces: prevAces.playerOneAces + 1,
           }))
+
+          acePlayerOne += 1
+        }
+      }
+      for (let i = 0; i < 2; i++) {
+        const playerCard = usedDeck.pop()
+        const cardImage = `/cards/${playerCard}.svg`
+        playerTwoCurrentCards.push(cardImage)
+        const value = getValue(playerCard!)
+        playerTwoValue += value!
+        if (value == 11) {
+          // setAceNumberPlayerOne((prevState) => prevState + 1)
+          setAces((prevAces: Ace) => ({
+            ...prevAces,
+            playerTwoAces: prevAces.playerTwoAces + 1,
+          }))
+          acePlayerTwo += 1
         }
       }
 
-      setCards((prevCards: any) => ({
-        ...prevCards,
+      setCards((prevCards: Card) => ({
+        houseCards: housecurrentCards,
         playerOneCards: playerOneCurrentCards,
+        playerTwoCards: playerTwoCurrentCards,
       }))
-      setSums((prevSums: any) => ({
-        ...prevSums,
-        playerOneSum: prevSums.playerOneSum + playerOneValue,
+      setSums((prevSums: Sum) => ({
+        houseSum: houseValue,
+        playerOneSum: playerOneValue,
+        playerTwoSum: playerTwoValue,
       }))
       setStartDeck(usedDeck)
+
+      return {
+        usedDeck,
+        aceHouse,
+        acePlayerOne,
+        acePlayerTwo,
+        houseValue,
+        playerOneValue,
+        playerTwoValue,
+        housecurrentCards,
+        playerOneCurrentCards,
+        playerTwoCurrentCards,
+      }
 
       if (
         deckData.length <= 4 &&
@@ -316,71 +480,103 @@ function SocketsProvider(props: any) {
     }
   }
 
-  const constructDeck = () => {
-    console.log("here utils")
+  // const constructDeck = () => {
+  //   console.log("here utils")
 
-    let deck: string[] = []
+  //   let deck: string[] = []
 
-    const cardValues: string[] = [
-      "A",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "J",
-      "Q",
-      "K",
-    ]
-    const cardTypes: string[] = ["D", "C", "H", "S"]
+  //   const cardValues: string[] = [
+  //     "A",
+  //     "2",
+  //     "3",
+  //     "4",
+  //     "5",
+  //     "6",
+  //     "7",
+  //     "8",
+  //     "9",
+  //     "10",
+  //     "J",
+  //     "Q",
+  //     "K",
+  //   ]
+  //   const cardTypes: string[] = ["D", "C", "H", "S"]
 
-    for (let i = 0; i < 2; i++) {
-      for (let i = 0; i < cardTypes.length; i++) {
-        for (let j = 0; j < cardValues.length; j++) {
-          deck.push(cardValues[j] + "-" + cardTypes[i])
-        }
-      }
-    }
+  //   for (let i = 0; i < 2; i++) {
+  //     for (let i = 0; i < cardTypes.length; i++) {
+  //       for (let j = 0; j < cardValues.length; j++) {
+  //         deck.push(cardValues[j] + "-" + cardTypes[i])
+  //       }
+  //     }
+  //   }
 
-    for (let i = 0; i < deck.length; i++) {
-      const randomNumber = Math.floor(Math.random() * deck.length)
-      const currentCard = deck[i]
-      deck[i] = deck[randomNumber] ?? ""
-      deck[randomNumber] = currentCard ?? ""
-    }
+  //   for (let i = 0; i < deck.length; i++) {
+  //     const randomNumber = Math.floor(Math.random() * deck.length)
+  //     const currentCard = deck[i]
+  //     deck[i] = deck[randomNumber] ?? ""
+  //     deck[randomNumber] = currentCard ?? ""
+  //   }
 
-    return deck
-  }
+  //   return deck
+  // }
+
+  // useEffect(() => {
+  //   setStartDeck([])
+  //   setAces({
+  //     playerOneAces: 0,
+  //     playerTwoAces: 0,
+  //     houseAces: 0,
+  //   })
+  //   setCards({
+  //     playerOneCards: [],
+  //     playerTwoCards: [],
+  //     houseCards: [],
+  //   })
+  //   setSums({
+  //     playerOneSum: 0,
+  //     playerTwoSum: 0,
+  //     houseSum: 0,
+  //   })
+  // }, [])
 
   console.log("cards", cards)
 
   useEffect(() => {
-    socket.on("new_player", (data) => {
+    socket.once("new_player", (data) => {
       // setStartDeck(data.deckData)
-      const newDeck = constructDeck()
+
+      // const newDeck = constructDeck()
       console.log("here? cont")
 
-      dealCards(newDeck)
+      // dealCards(newDeck)
       setIsSinglePlayer(false)
-      // setCards(data.cards)
-      // setSums(data.sums)
-      // setAces(data.aces)
-      // setStartDeck(data.deck)
+      setCards({
+        playerOneCards: data.cards.playerOne,
+        playerTwoCards: data.cards.playerTwo,
+        houseCards: data.cards.house,
+      })
+      setSums({
+        playerOneSum: data.sums.playerOne,
+        playerTwoSum: data.sums.playerTwo,
+        houseSum: data.sums.house,
+      })
+      setAces({
+        playerOneAces: data.aces.playerOne,
+        playerTwoAces: data.aces.playerTwo,
+        houseAces: data.aces.house,
+      })
+      setStartDeck(data.deck)
 
-      const emitData = {
-        deck: startDeck,
-        cards: cards,
-        sums: sums,
-        aces: aces,
-      }
+      // const emitData = {
+      //   deck: startDeck,
+      //   cards: cards,
+      //   sums: sums,
+      //   aces: aces,
+      // }
 
-      socket.emit("card_dealt", emitData)
+      // socket.emit("card_dealt", emitData)
       console.log("data", data)
-      console.log("socket deck", newDeck)
+      // console.log("socket deck", newDeck)
       setIsSinglePlayer(false)
       // dealCards(data)
       // setIsGameStarted(true)
@@ -404,17 +600,24 @@ function SocketsProvider(props: any) {
     //   }))
     // })
 
-    socket.on("current_deck", (data) => {
-      setCards(data.cards)
-      setSums(data.sums)
-      setAces(data.aces)
-      setStartDeck(data.deck)
-      // setCards({
-      //   playerOneCards: data.playerOneCards,
-      //   playerTwoCards: data.playerTwoCards,
-      //   houseCards: data.houseCards,
-      // })
-    })
+    // socket.on("current_deck", (data) => {
+    // setCards(data.cards)
+    // setSums(data.sums)
+    // setAces(data.aces)
+    // setStartDeck(data.deck)
+    // setCards({
+    //   playerOneCards: data.playerOneCards,
+    //   playerTwoCards: data.playerTwoCards,
+    //   houseCards: data.houseCards,
+    // })
+    // })
+
+    return () => {
+      socket.off("new_player")
+      // socket.off('new_player');
+      // socket.off('disconnect');
+      // socket.off('pong');
+    }
 
     // socket.on()
   }, [socket])
@@ -436,7 +639,7 @@ function SocketsProvider(props: any) {
         isGameActive,
         isSinglePlayer,
         setIsSinglePlayer,
-        // dealCards,
+        dealCards,
       }}
       {...props}
     />
