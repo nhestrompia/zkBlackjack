@@ -295,10 +295,18 @@ io.on("connection", (socket) => {
     console.log("data hitme0", data)
     // getCard(data.deck, data.player, data.room)
     // let currentRoom = roomInfo.find((roomData) => roomData.room == data.room)
-    // io.in(data.room).emit("got_card", currentRoom)
+    socket.to(data.room).emit("got_card", data)
   })
 
-  socket.on("stand", (data) => {})
+  socket.on("stand", (data) => {
+    console.log("data stand", data)
+
+    socket.to(data.room).emit("stand_hand", data)
+  })
+
+  socket.on("round_finished", (data) => {
+    socket.to(data.room).emit("new_round", data)
+  })
 
   // socket.on("player_joined", (data) => {
   // io.in(data.room).emit("new_player", data.deck)

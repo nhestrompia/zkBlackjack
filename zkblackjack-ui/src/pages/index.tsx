@@ -44,7 +44,7 @@ const Home: NextPage<IProps> = ({
 
   const {
     socket,
-    dealCards,
+    dealRoundCards,
 
     startDeck,
     isGameActive,
@@ -143,7 +143,7 @@ const Home: NextPage<IProps> = ({
           housecurrentCards,
           playerOneCurrentCards,
           playerTwoCurrentCards,
-        } = dealCards(tempDeck)
+        } = dealRoundCards(tempDeck)
 
         const sendData = {
           room: data,
@@ -168,8 +168,8 @@ const Home: NextPage<IProps> = ({
           // sums: sums,
         }
 
-        console.log("send data", sendData)
         socket.emit("join_room", sendData)
+        console.log("send data", sendData)
         setIsGameActive(true)
         setIsSinglePlayer(false)
 
@@ -211,9 +211,12 @@ const Home: NextPage<IProps> = ({
       console.log("game room", gameRoom)
 
       socket.emit("create_room", gameRoom.toString())
+      // const newRoom = window.prompt()
+      // socket.emit("create_room", newRoom?.toString())
       setIsGameActive(true)
       setIsSinglePlayer(false)
       router.push(`/room/${gameRoom}`)
+      // router.push(`/room/${newRoom}`)
     } catch (err) {
       console.error(err)
       setIsLoading(false)
@@ -265,7 +268,7 @@ const Home: NextPage<IProps> = ({
       </Head>
 
       <main className="bg-[#144b1e]  pb-1 text-white">
-        <nav className="px-8 md:px-2 fixed w-full z-20 top-0 left-0 py-3.5    "></nav>
+        <nav className="px-8 md:px-2 fixed w-full -z-10 top-0 left-0 py-3.5    "></nav>
         {isLoading ? (
           <div className="flex justify-center flex-row  relative top-64 left-0 z-20">
             <div className=" absolute top-12 left-1/2">

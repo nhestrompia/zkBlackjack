@@ -11,8 +11,14 @@ import {
   BLACKJACK_CONTRACT_ADDRESS,
 } from "../../constants"
 import { useSockets } from "../context/SocketContext"
-import { Score } from "./Game"
-import { getCreate2Address } from "ethers/lib/utils"
+import { Score } from "../context/SocketContext"
+
+type CardGet = {
+  startDeck?: string[] | undefined
+  tempDeck?: string[] | undefined
+  cardImage?: string | undefined
+  playerValue?: number | undefined
+}
 
 interface IProps {
   account: string
@@ -27,7 +33,7 @@ interface IProps {
   // getCard: (val: string[]) => void
 
   library: ethers.providers.Web3Provider
-  getCard?: (val: string[], player: string) => void
+  getCard?: (val: string[], player: string) => CardGet
   playerOneRound: string[]
   playerTwoRound: string[]
 
@@ -51,36 +57,6 @@ interface PlayerInfo {
   sum: number
 }
 
-// const ACTIONS = {
-//   WIN_ROUND: "win-round",
-//   LOSE_ROUND: "lose-round",
-//   DRAW_ROUND: "draw-round",
-// }
-
-// enum LeaderboardActionKind {
-//   WIN_ROUND = "win-round",
-//   LOSE_ROUND = "lose-round",
-//   DRAW_ROUND = "draw-round",
-// }
-
-// interface LeaderboardAction {
-//   type: LeaderboardActionKind
-//   payload: string
-// }
-
-// const reducer = (state: Array<string>, action: LeaderboardAction) => {
-//   switch (action.type) {
-//     case LeaderboardActionKind.WIN_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.LOSE_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.DRAW_ROUND:
-//       return [...state, action.payload]
-//     default:
-//       throw new Error(`Unhandled  action type ${action.type}`)
-//   }
-// }
-
 export const Table: React.FC<IProps> = ({
   account,
   library,
@@ -92,7 +68,7 @@ export const Table: React.FC<IProps> = ({
   playerOneRound,
   playerTwoRound,
   isCanWithdraw,
-  score,
+  // score,
   getCard,
   // isSinglePlayer,
   isGameEnded,
@@ -111,6 +87,9 @@ export const Table: React.FC<IProps> = ({
     isSinglePlayer,
     isGameActive,
     setIsGameActive,
+    score,
+    setScore,
+    stand,
   } = useSockets()
   // const handleClick = () => {
   //   dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
@@ -138,13 +117,18 @@ export const Table: React.FC<IProps> = ({
     } else {
       playerNumber = "1"
     }
+    const { tempDeck, cardImage, playerValue } = getCard!(
+      startDeck,
+      playerNumber
+    )
 
     const sendData = {
-      deck: startDeck,
+      deck: tempDeck,
+      card: cardImage,
+      sum: playerValue,
       player: playerNumber,
       room: room,
     }
-
     socket.emit("hit_me", sendData)
   }
 
@@ -161,37 +145,34 @@ export const Table: React.FC<IProps> = ({
       ethers.utils.parseEther("0.5")
     )
   }
-  const checkVerifier = async () => {
-    const signer = library?.getSigner()
 
-    const blackjackContract = new Contract(
-      BLACKJACK_CONTRACT_ADDRESS,
-      BLACKJACK_CONTRACT_ABI,
-      signer
-    )
-
-    const tx = await blackjackContract.verifierAddress()
-  }
-
-  const stand = async () => {
+  const standHand = async () => {
     // toast.info("Calculating Winner")
 
     let playerNumber: string
     if (account === playerTwo) {
       playerNumber = "2"
+      if (!stand.playerTwo) {
+        await calculateProof(playerNumber)
+      } else {
+        toast.info("Wait for other player")
+      }
       // setPlayerTwoRound((prevState: string[]) => [
       //   ...prevState,
       //   "Calculating...",
       // ])
     } else {
       playerNumber = "1"
+      if (!stand.playerOne) {
+        await calculateProof(playerNumber)
+      } else {
+        toast.info("Wait for other player")
+      }
       // setPlayerOneRound((prevState: string[]) => [
       //   ...prevState,
       //   "Calculating...",
       // ])
     }
-
-    await calculateProof(playerNumber)
   }
 
   useEffect(() => {
@@ -430,7 +411,7 @@ export const Table: React.FC<IProps> = ({
           {!isGameEnded && (
             <div className="col-start-3 row-start-1 flex ml-24 mt-6 flex-col items-center  ">
               <button
-                onClick={stand}
+                onClick={standHand}
                 className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"
               >
                 <Image
@@ -970,7 +951,7 @@ export const Table: React.FC<IProps> = ({
           </div>
           <div className="col-start-3  row-start-1 flex ml-12 mt-6 flex-col items-center  ">
             <button
-              onClick={stand}
+              onClick={standHand}
               className="p-4 mb-4  hover:scale-110 transition duration-300 ease-in-out"
             >
               <Image

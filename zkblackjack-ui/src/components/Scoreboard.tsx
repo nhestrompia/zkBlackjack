@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import truncateEthAddress from "truncate-eth-address"
-import { Score } from "./Game"
+import { Score } from "../context/SocketContext"
 
 interface IProps {
   playerOne: string
@@ -69,6 +69,19 @@ export const Scoreboard: React.FC<IProps> = ({
                   )
                 })
               : ""}
+          </div>
+          <div
+            className={`row-start-4 ${
+              playerTwoRound && playerTwoRound!.length >= 10
+                ? "top-40"
+                : "top-28"
+            } relative`}
+          >
+            {playerTwoRound && playerTwoRound!.length > 0 && (
+              <h1 className="font-poppins text-xl">
+                Score : {score.playerTwo}
+              </h1>
+            )}
           </div>
         </div>
       )}

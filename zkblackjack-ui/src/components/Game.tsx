@@ -20,7 +20,7 @@ import { Table } from "./Table"
 import { useRouter } from "next/router"
 import { useSockets } from "../context/SocketContext"
 import { blackjackCalldata } from "../../zkproof/snarkjsBlackjack"
-import { Ace, Card, Sum } from "../context/SocketContext"
+import { Ace, Card, Sum, Stand, Score } from "../context/SocketContext"
 import Router from "next/router"
 
 interface IProps {
@@ -40,9 +40,11 @@ interface TransactionResponse {
 //   playerTwo: string[]
 // }
 
-export interface Score {
-  playerOne: number
-  playerTwo: number
+type CardGet = {
+  tempDeck?: string[] | undefined
+  startDeck?: string[] | undefined
+  cardImage?: string | undefined
+  playerValue?: number | undefined
 }
 
 export const Game: React.FC<IProps> = ({
@@ -53,16 +55,12 @@ export const Game: React.FC<IProps> = ({
   room,
 }) => {
   const [currentDeck, setCurrentDeck] = useState<string[]>([])
-  const [score, setScore] = useState<Score>({
-    playerOne: 0,
-    playerTwo: 0,
-  })
+
   // const [roundText, setRoundText] = useState<RoundResult>({
   //   playerOne: [],
   //   playerTwo: [],
   // })
-  const [playerOneRound, setPlayerOneRound] = useState<string[]>([])
-  const [playerTwoRound, setPlayerTwoRound] = useState<string[]>([])
+
   const [isCanWithdraw, setIsCanWithdraw] = useState(false)
   const [isGameEnded, setIsGameEnded] = useState<boolean>(false)
 
@@ -78,7 +76,16 @@ export const Game: React.FC<IProps> = ({
     aces,
     setAces,
     deckData,
+    setPlayerOneRound,
+    setPlayerTwoRound,
+    playerOneRound,
+    playerTwoRound,
     isGameActive,
+    dealRoundCards,
+    stand,
+    setScore,
+    score,
+    setStand,
     setIsGameActive,
   } = useSockets()
 
@@ -206,6 +213,53 @@ export const Game: React.FC<IProps> = ({
     }
   }, [isGameEnded])
 
+  useEffect(() => {
+    if (stand.playerOne && stand.playerTwo) {
+      const {
+        usedDeck,
+        aceHouse,
+        acePlayerOne,
+        acePlayerTwo,
+        houseValue,
+        playerOneValue,
+        playerTwoValue,
+        housecurrentCards,
+        playerOneCurrentCards,
+        playerTwoCurrentCards,
+      } = dealRoundCards(startDeck)
+
+      const sendData = {
+        room: room,
+        deck: usedDeck,
+        cards: {
+          playerOne: playerOneCurrentCards,
+          playerTwo: playerTwoCurrentCards,
+          house: housecurrentCards,
+        },
+        aces: {
+          playerOne: acePlayerOne,
+          playerTwo: acePlayerTwo,
+          house: aceHouse,
+        },
+        sums: {
+          playerOne: playerOneValue,
+          playerTwo: playerTwoValue,
+          house: houseValue,
+        },
+        score: score,
+        // cards: cards,
+        // aces: aces,
+        // sums: sums,
+      }
+
+      socket.emit("round_finished", sendData)
+      setStand({
+        playerOne: false,
+        playerTwo: false,
+      })
+    }
+  }, [stand])
+
   const unlockBet = async (playerAddress: string, playerNumber: string) => {
     try {
       const signer = new ethers.Wallet(
@@ -303,7 +357,7 @@ export const Game: React.FC<IProps> = ({
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
           setIsCanWithdraw(false)
-          setIsLoading(false) //TODO is loading gave error also fix round text
+          setIsLoading(false)
 
           router.push("/")
         }
@@ -404,17 +458,11 @@ export const Game: React.FC<IProps> = ({
       if (player === "1") {
         setPlayerOneRound([...playerOneRound, "Calculating..."])
 
-        calldata = await blackjackCalldata(
-          deckData.player1.sum,
-          deckData.house.sum
-        )
+        calldata = await blackjackCalldata(sums.playerOneSum, sums.houseSum)
       } else {
-        setPlayerTwoRound((prevState) => [...prevState, "Calculating..."])
+        setPlayerTwoRound([...playerTwoRound, "Calculating..."])
 
-        calldata = await blackjackCalldata(
-          deckData.player2.sum,
-          deckData.house.sum
-        )
+        calldata = await blackjackCalldata(sums.playerTwoSum, sums.houseSum)
       }
     }
 
@@ -494,7 +542,7 @@ export const Game: React.FC<IProps> = ({
     return deck
   }
 
-  const getCard = (deckData: string[], player: string) => {
+  function getCard(deckData: string[], player: string): CardGet | any {
     if (isSinglePlayer) {
       if (sums.playerOneSum >= 21) {
         toast.error("You can't get more cards", {
@@ -568,6 +616,8 @@ export const Game: React.FC<IProps> = ({
           setCurrentDeck(tempDeck)
           return {
             tempDeck,
+            cardImage,
+            playerValue,
           }
         }
       } else {
@@ -581,6 +631,9 @@ export const Game: React.FC<IProps> = ({
             draggable: true,
             progress: undefined,
           })
+          return {
+            startDeck,
+          }
         } else {
           const tempDeck = deckData
           let playerValue = 0
@@ -604,6 +657,11 @@ export const Game: React.FC<IProps> = ({
             playerTwoSum: prevState.playerTwoSum + playerValue,
           }))
           setCurrentDeck(tempDeck)
+          return {
+            tempDeck,
+            cardImage,
+            playerValue,
+          }
         }
       }
     }
@@ -788,6 +846,7 @@ export const Game: React.FC<IProps> = ({
     draw: string,
     playerSum: string
   ) => {
+    console.log("player", player)
     if (isSinglePlayer) {
       console.log("playeroneRound", playerOneRound)
       if (result === "1") {
@@ -802,12 +861,12 @@ export const Game: React.FC<IProps> = ({
         // })
         // setRoundText(newRound)
 
-        setPlayerOneRound((prev) =>
+        setPlayerOneRound((prev: string[]) =>
           prev.filter((text) => text !== "Calculating...")
         )
-        setPlayerOneRound((prevState) => [...prevState, "Win"])
+        setPlayerOneRound((prevState: string[]) => [...prevState, "Win"])
 
-        setScore((prevState) => ({
+        setScore((prevState: Score) => ({
           ...prevState,
           playerOne: prevState.playerOne + 1,
         }))
@@ -825,20 +884,20 @@ export const Game: React.FC<IProps> = ({
             // })
             // console.log("new round", newRound)
             // setRoundText(newRound)
-            setPlayerOneRound((prev) =>
+            setPlayerOneRound((prev: string[]) =>
               prev.filter((text) => text !== "Calculating...")
             )
-            setPlayerOneRound((prevState) => [...prevState, "Lose"])
+            setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
 
-            setScore((prevState) => ({
+            setScore((prevState: Score) => ({
               ...prevState,
               playerOne: prevState.playerOne - 1,
             }))
           } else {
-            setPlayerOneRound((prev) =>
+            setPlayerOneRound((prev: string[]) =>
               prev.filter((text) => text !== "Calculating...")
             )
-            setPlayerOneRound((prevState) => [...prevState, "Draw"])
+            setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
           }
         } else {
           // const newRound = playerOneRound!.map((text, index) => {
@@ -858,12 +917,12 @@ export const Game: React.FC<IProps> = ({
           // copyArr.pop()
           // copyArr.push("Lose")
           // setPlayerOneRound(copyArr)
-          setPlayerOneRound((prev) =>
+          setPlayerOneRound((prev: string[]) =>
             prev.filter((text) => text !== "Calculating...")
           )
-          setPlayerOneRound((prevState) => [...prevState, "Lose"])
+          setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
 
-          setScore((prevState) => ({
+          setScore((prevState: Score) => ({
             ...prevState,
             playerOne: prevState.playerOne - 1,
           }))
@@ -881,12 +940,12 @@ export const Game: React.FC<IProps> = ({
           // })
           // console.log("new round", newRound)
           // setRoundText(newRound)
-          setPlayerOneRound((prev) =>
+          setPlayerOneRound((prev: string[]) =>
             prev.filter((text) => text !== "Calculating...")
           )
-          setPlayerOneRound((prevState) => [...prevState, "Lose"])
+          setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
 
-          setScore((prevState) => ({
+          setScore((prevState: Score) => ({
             ...prevState,
             playerOne: prevState.playerOne - 1,
           }))
@@ -902,10 +961,10 @@ export const Game: React.FC<IProps> = ({
           // })
           // console.log("new round", newRound)
           // setRoundText(newRound)
-          setPlayerOneRound((prev) =>
-            prev.filter((text) => text !== "Calculating...")
+          setPlayerOneRound((prev: string[]) =>
+            prev.filter((text: string) => text !== "Calculating...")
           )
-          setPlayerOneRound((prevState) => [...prevState, "Draw"])
+          setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
 
           // setRoundText({
           //   ...roundText,
@@ -923,83 +982,192 @@ export const Game: React.FC<IProps> = ({
         dealCards(currentDeck)
       }
     } else {
-      // if (player === "1") {
-      //   if (result === "1") {
-      //     setRoundText((prevState) => ({
-      //       ...prevState,
-      //       playerOne: [...prevState.playerOne, "Win"],
-      //     }))
-      //     setScore((prevState) => ({
-      //       ...prevState,
-      //       playerOne: prevState.playerOne + 1,
-      //     }))
-      //   } else if (result === "0") {
-      //     setRoundText((prevState) => ({
-      //       ...prevState,
-      //       playerOne: [...prevState.playerOne, "Lose"],
-      //     }))
-      //     setScore((prevState) => ({
-      //       ...prevState,
-      //       playerOne: prevState.playerOne - 1,
-      //     }))
-      //   } else if (result === "2") {
-      //     if (parseInt(playerSum) > 21) {
-      //       setRoundText((prevState) => ({
-      //         ...prevState,
-      //         playerOne: [...prevState.playerOne, "Lose"],
-      //       }))
-      //       setScore((prevState) => ({
-      //         ...prevState,
-      //         playerOne: prevState.playerOne - 1,
-      //       }))
-      //       // setRoundText({
-      //       //   ...roundText,
-      //       //   playerOne: [...roundText.playerOne, "Lose"],
-      //       // });
-      //     } else {
-      //       setRoundText((prevState) => ({
-      //         ...prevState,
-      //         playerOne: [...prevState.playerOne, "Draw"],
-      //       }))
-      //     }
-      //   }
-      // } else {
-      //   if (result === "1") {
-      //     setRoundText((prevState) => ({
-      //       ...prevState,
-      //       playerTwo: [...prevState.playerTwo, "Win"],
-      //     }))
-      //     setScore((prevState) => ({
-      //       ...prevState,
-      //       playerTwo: prevState.playerOne + 1,
-      //     }))
-      //   } else if (result === "0") {
-      //     setRoundText((prevState) => ({
-      //       ...prevState,
-      //       playerTwo: [...prevState.playerTwo, "Lose"],
-      //     }))
-      //     setScore((prevState) => ({
-      //       ...prevState,
-      //       playerTwo: prevState.playerOne - 1,
-      //     }))
-      //   } else if (result === "2") {
-      //     if (parseInt(playerSum) > 21) {
-      //       setRoundText((prevState) => ({
-      //         ...prevState,
-      //         playerTwo: [...prevState.playerTwo, "Lose"],
-      //       }))
-      //       setScore((prevState) => ({
-      //         ...prevState,
-      //         playerTwo: prevState.playerOne + 1,
-      //       }))
-      //     } else {
-      //       setRoundText((prevState) => ({
-      //         ...prevState,
-      //         playerTwo: [...prevState.playerTwo, "Draw"],
-      //       }))
-      //     }
-      //   }
-      // }
+      if (player === "1") {
+        setStand({
+          ...stand,
+          playerOne: true,
+        })
+        if (result === "1") {
+          setPlayerOneRound((prev: string[]) =>
+            prev.filter((text) => text !== "Calculating...")
+          )
+          setPlayerOneRound((prevState: string[]) => [...prevState, "Win"])
+          setScore((prevState: Score) => ({
+            ...prevState,
+            playerOne: prevState.playerOne + 1,
+          }))
+          const eventData = {
+            room: room,
+            player: player,
+            round: "Win",
+            score: score,
+          }
+          socket.emit("stand", eventData)
+        } else if (result === "0") {
+          setPlayerOneRound((prev: string[]) =>
+            prev.filter((text) => text !== "Calculating...")
+          )
+          if (draw === "2") {
+            if (parseInt(playerSum) > 21) {
+              setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
+              setScore((prevState: Score) => ({
+                ...prevState,
+                playerOne: prevState.playerOne - 1,
+              }))
+              const eventData = {
+                room: room,
+                player: player,
+                round: "Lose",
+                score: score,
+              }
+              socket.emit("stand", eventData)
+            } else {
+              setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
+              const eventData = {
+                room: room,
+                player: player,
+                round: "Draw",
+                score: score,
+              }
+              socket.emit("stand", eventData)
+            }
+          } else {
+            setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerOne: prevState.playerOne - 1,
+            }))
+            const eventData = {
+              room: room,
+              player: player,
+              round: "Lose",
+              score: score,
+            }
+            socket.emit("stand", eventData)
+          }
+        } else if (result === "2") {
+          if (parseInt(playerSum) > 21) {
+            setPlayerOneRound((prev: string[]) =>
+              prev.filter((text) => text !== "Calculating...")
+            )
+            setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerOne: prevState.playerOne - 1,
+            }))
+            const eventData = {
+              room: room,
+              player: player,
+              round: "Lose",
+              score: score,
+            }
+            socket.emit("stand", eventData)
+            // setRoundText({
+            //   ...roundText,
+            //   playerOne: [...roundText.playerOne, "Lose"],
+            // });
+          } else {
+            setPlayerOneRound((prev: string[]) =>
+              prev.filter((text) => text !== "Calculating...")
+            )
+            setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
+          }
+          const eventData = {
+            room: room,
+            player: player,
+            round: "Draw",
+            score: score,
+          }
+          socket.emit("stand", eventData)
+        }
+      } else {
+        setStand({
+          ...stand,
+          playerTwo: true,
+        })
+        if (result === "1") {
+          setPlayerTwoRound((prev: string[]) =>
+            prev.filter((text) => text !== "Calculating...")
+          )
+          setPlayerTwoRound((prevState: string[]) => [...prevState, "Win"])
+          setScore((prevState: Score) => ({
+            ...prevState,
+            playerTwo: prevState.playerTwo + 1,
+          }))
+          const eventData = {
+            room: room,
+            player: player,
+            round: "Win",
+            score: score,
+          }
+          socket.emit("stand", eventData)
+        } else if (result === "0") {
+          setPlayerTwoRound((prev: string[]) =>
+            prev.filter((text) => text !== "Calculating...")
+          )
+          if (draw === "2") {
+            if (parseInt(playerSum) > 21) {
+              setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
+              setScore((prevState: Score) => ({
+                ...prevState,
+                playerTwo: prevState.playerTwo - 1,
+              }))
+              const eventData = {
+                room: room,
+                player: player,
+                round: "Lose",
+                score: score,
+              }
+              socket.emit("stand", eventData)
+            } else {
+              setPlayerTwoRound((prevState: string[]) => [...prevState, "Draw"])
+              const eventData = {
+                room: room,
+                player: player,
+                round: "Draw",
+                score: score,
+              }
+              socket.emit("stand", eventData)
+            }
+          } else {
+            setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerTwo: prevState.playerTwo - 1,
+            }))
+            const eventData = {
+              room: room,
+              player: player,
+              round: "Lose",
+              score: score,
+            }
+            socket.emit("stand", eventData)
+          }
+        } else if (result === "2") {
+          if (parseInt(playerSum) > 21) {
+            setPlayerTwoRound((prev: string[]) =>
+              prev.filter((text) => text !== "Calculating...")
+            )
+            setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerTwo: prevState.playerTwo - 1,
+            }))
+            const eventData = {
+              room: room,
+              player: player,
+              round: "Lose",
+              score: score,
+            }
+            socket.emit("stand", eventData)
+          } else {
+            setPlayerTwoRound((prev: string[]) =>
+              prev.filter((text) => text !== "Calculating...")
+            )
+            setPlayerTwoRound((prevState: string[]) => [...prevState, "Draw"])
+          }
+        }
+      }
     }
   }
 
