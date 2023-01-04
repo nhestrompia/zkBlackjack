@@ -18,7 +18,7 @@ import "react-toastify/dist/ReactToastify.css"
 import { Modal } from "./Modal"
 import { Table } from "./Table"
 import { useRouter } from "next/router"
-import { useSockets } from "../context/SocketContext"
+import { useSockets, Withdraw } from "../context/SocketContext"
 import { blackjackCalldata } from "../../zkproof/snarkjsBlackjack"
 import { Ace, Card, Sum, Stand, Score } from "../context/SocketContext"
 import Router from "next/router"
@@ -61,11 +61,12 @@ export const Game: React.FC<IProps> = ({
   //   playerTwo: [],
   // })
 
-  const [isCanWithdraw, setIsCanWithdraw] = useState(false)
   const [isGameEnded, setIsGameEnded] = useState<boolean>(false)
 
   const {
     socket,
+    isCanWithdraw,
+    setIsCanWithdraw,
     startDeck,
     setStartDeck,
     isSinglePlayer,
@@ -94,7 +95,10 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     if (effectRan.current === false) {
-      setIsCanWithdraw(false)
+      // setIsCanWithdraw({
+      //   playerOne : false,
+      //   playerOne : false,
+      // })
       setIsLoading(false)
       setIsGameEnded(false)
 
@@ -136,6 +140,10 @@ export const Game: React.FC<IProps> = ({
             }
           )
           const confirmation = await library.waitForTransaction(tx.hash)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerOne: true,
+          }))
         } else if (score.playerOne === 0) {
           const tx: TransactionResponse = await toast.promise(
             blackjackContract.withdrawBet(
@@ -150,6 +158,10 @@ export const Game: React.FC<IProps> = ({
             }
           )
           const confirmation = await library.waitForTransaction(tx.hash)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerOne: true,
+          }))
         }
       } else {
         if (score.playerTwo > 0) {
@@ -166,6 +178,10 @@ export const Game: React.FC<IProps> = ({
             }
           )
           const confirmation = await library.waitForTransaction(tx.hash)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerTwo: true,
+          }))
         } else if (score.playerTwo === 0) {
           const tx: TransactionResponse = await toast.promise(
             blackjackContract.withdrawBet(
@@ -180,12 +196,15 @@ export const Game: React.FC<IProps> = ({
             }
           )
           const confirmation = await library.waitForTransaction(tx.hash)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerTwo: true,
+          }))
         }
       }
 
       // setRoundText(["Play", "Again"])
       setIsGameEnded(false)
-      setIsCanWithdraw(false)
       setIsLoading(false)
       router.push("/")
     } catch (err) {
@@ -196,7 +215,7 @@ export const Game: React.FC<IProps> = ({
   useEffect(() => {
     if (isGameEnded) {
       if (isSinglePlayer) {
-        unlockBet(account, "1")
+        unlockBet(account, "1") //TODO fix it for multiplayer
       } else {
       }
       setCards({ playerOneCards: [], playerTwoCards: [], houseCards: [] })
@@ -311,7 +330,11 @@ export const Game: React.FC<IProps> = ({
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
 
-          setIsCanWithdraw(true)
+          // setIsCanWithdraw(true)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerOne: true,
+          }))
         } else if (score.playerOne === 0) {
           toast.info(
             "It was a close game but it ended in tie. Wait for withdraw button to come to get back your initial bet",
@@ -333,8 +356,11 @@ export const Game: React.FC<IProps> = ({
             ethers.utils.parseEther("0.01")
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
-
-          setIsCanWithdraw(true)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerOne: true,
+          }))
+          // setIsCanWithdraw(true)
         } else {
           toast.info(
             "It was a close game but you have lost it. Play again to earn back your 0.01 ETH ",
@@ -356,7 +382,10 @@ export const Game: React.FC<IProps> = ({
             ethers.utils.parseEther("0.00")
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
-          setIsCanWithdraw(false)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerOne: false,
+          }))
           setIsLoading(false)
 
           router.push("/")
@@ -394,7 +423,10 @@ export const Game: React.FC<IProps> = ({
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
 
-          setIsCanWithdraw(true)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerTwo: true,
+          }))
         } else if (score.playerTwo === 0) {
           toast.info(
             "It was a close game but it ended in tie. Wait for withdraw button to come to get back your initial bet",
@@ -416,7 +448,10 @@ export const Game: React.FC<IProps> = ({
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
 
-          setIsCanWithdraw(true)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerTwo: true,
+          }))
         } else {
           toast.info(
             "It was a close game but you have lost it. Play again to earn back your 0.01 ETH ",
@@ -436,7 +471,10 @@ export const Game: React.FC<IProps> = ({
             ethers.utils.parseEther("0.00")
           )
           const endGameReceipt = await library.waitForTransaction(endGame.hash)
-          setIsCanWithdraw(false)
+          setIsCanWithdraw((prevState: Withdraw) => ({
+            ...prevState,
+            playerTwo: false,
+          }))
           setIsLoading(false)
 
           router.push("/")

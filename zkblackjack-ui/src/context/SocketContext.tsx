@@ -34,12 +34,19 @@ interface Context {
   playerTwoRound: string[]
   setScore: Function
   score: Score
+  isCanWithdraw: boolean
+  setIsCanWithdraw: Function
   // rooms: object;
 }
 
 export interface Score {
   playerOne: number
   playerTwo: number
+}
+
+export interface Withdraw {
+  playerOne: boolean
+  playerTwo: boolean
 }
 
 interface SocketData {
@@ -124,6 +131,9 @@ const SocketContext = createContext<Context>({
     playerTwoCards: [],
     houseCards: [],
   },
+  isCanWithdraw: false,
+  setIsCanWithdraw: (val: boolean) => false,
+
   setCards: () => false,
   dealRoundCards: () => false,
   sums: {
@@ -190,7 +200,10 @@ function SocketsProvider(props: any) {
     playerTwoAces: 0,
     houseAces: 0,
   })
-
+  const [isCanWithdraw, setIsCanWithdraw] = useState<Withdraw>({
+    playerOne: false,
+    playerTwo: false,
+  })
   const [isGameActive, setIsGameActive] = useState(false)
   const [isSinglePlayer, setIsSinglePlayer] = useState(false)
 
@@ -763,6 +776,8 @@ function SocketsProvider(props: any) {
         setStand,
         setScore,
         score,
+        setIsCanWithdraw,
+        isCanWithdraw,
       }}
       {...props}
     />
