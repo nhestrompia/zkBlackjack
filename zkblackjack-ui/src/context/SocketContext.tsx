@@ -34,8 +34,10 @@ interface Context {
   playerTwoRound: string[]
   setScore: Function
   score: Score
-  isCanWithdraw: boolean
+  isCanWithdraw: Withdraw
   setIsCanWithdraw: Function
+  setIsGameEnded: Function
+  isGameEnded: boolean
   // rooms: object;
 }
 
@@ -88,6 +90,8 @@ const socket = io("http://localhost:3001")
 
 const SocketContext = createContext<Context>({
   socket,
+  isGameEnded: false,
+  setIsGameEnded: (val: boolean) => false,
   isSinglePlayer: false,
   setIsSinglePlayer: (val: boolean) => false,
   setDeckData: () => false,
@@ -131,7 +135,7 @@ const SocketContext = createContext<Context>({
     playerTwoCards: [],
     houseCards: [],
   },
-  isCanWithdraw: false,
+  isCanWithdraw: { playerOne: false, playerTwo: false },
   setIsCanWithdraw: (val: boolean) => false,
 
   setCards: () => false,
@@ -156,6 +160,8 @@ const SocketContext = createContext<Context>({
 function SocketsProvider(props: any) {
   const [startDeck, setStartDeck] = useState<string[]>([])
   // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
+  const [isGameEnded, setIsGameEnded] = useState<boolean>(false)
+
   const [playerOneRound, setPlayerOneRound] = useState<string[]>([])
   const [playerTwoRound, setPlayerTwoRound] = useState<string[]>([])
   const [score, setScore] = useState<Score>({
@@ -375,7 +381,7 @@ function SocketsProvider(props: any) {
     console.log("tried")
     let usedDeck: string[] = deckData
 
-    if (deckData.length >= 4) {
+    if (deckData.length >= 6) {
       // setRoundText([])
 
       setAces({
@@ -489,6 +495,15 @@ function SocketsProvider(props: any) {
       }))
       setStartDeck(usedDeck)
 
+      if (startDeck.length <= 6) {
+        setIsGameActive(false)
+        setIsGameEnded(true)
+        setStand({
+          playerOne: true,
+          playerTwo: true,
+        })
+      }
+
       return {
         usedDeck,
         aceHouse,
@@ -503,7 +518,7 @@ function SocketsProvider(props: any) {
       }
 
       if (
-        deckData.length <= 4 &&
+        startDeck.length <= 4 &&
         cards.playerOneCards.length < 2 &&
         cards.playerTwoCards.length < 2
       ) {
@@ -592,7 +607,7 @@ function SocketsProvider(props: any) {
   //     houseSum: 0,
   //   })
   // }, [])
-
+  console.log("startdeck", startDeck)
   console.log("cards", cards)
   console.log("stand  ", stand)
   console.log("sums", sums)
@@ -670,20 +685,20 @@ function SocketsProvider(props: any) {
           ...prevState,
           playerOne: true,
         }))
-        setScore((prevState: Score) => ({
-          ...prevState,
-          playerOne: data.score.playerOne,
-        }))
+        // setScore((prevState: Score) => ({
+        //   ...prevState,
+        //   playerOne: data.score.playerOne,
+        // }))
       } else {
         setPlayerTwoRound((prevState: string[]) => [...prevState, data.round])
         setStand((prevState: Stand) => ({
           ...prevState,
           playerTwo: true,
         }))
-        setScore((prevState: Score) => ({
-          ...prevState,
-          playerOne: data.score.playerTwo,
-        }))
+        // setScore((prevState: Score) => ({
+        //   ...prevState,
+        //   playerOne: data.score.playerTwo,
+        // }))
       }
     })
 
@@ -778,6 +793,8 @@ function SocketsProvider(props: any) {
         score,
         setIsCanWithdraw,
         isCanWithdraw,
+        setIsGameEnded,
+        isGameEnded,
       }}
       {...props}
     />

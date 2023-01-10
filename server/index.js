@@ -275,7 +275,7 @@ io.on("connection", (socket) => {
     // console.log("roomInfo", currentRoom)
     console.log("data new", data)
 
-    io.in(data.room).emit("new_player", data)
+    socket.to(data.room).emit("new_player", data)
 
     // socket.to(data.room).emit("new_player", data.deck)
 

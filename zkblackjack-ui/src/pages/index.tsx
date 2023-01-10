@@ -51,13 +51,16 @@ const Home: NextPage<IProps> = ({
     setIsGameActive,
     setIsSinglePlayer,
     cards,
+    setStand,
     sums,
     aces,
+    setIsGameEnded,
   } = useSockets()
 
   useEffect(() => {
     setIsGameActive(false)
     setIsSinglePlayer(false)
+    setIsGameEnded(false)
   }, [])
 
   console.log("index", cards)
@@ -170,9 +173,13 @@ const Home: NextPage<IProps> = ({
 
         socket.emit("join_room", sendData)
         console.log("send data", sendData)
+        setStand({
+          playerOne: false,
+          playerTwo: false,
+        })
         setIsGameActive(true)
         setIsSinglePlayer(false)
-
+        setIsLoading(false)
         router.push(`/room/${data}`)
       }
     } catch (error) {

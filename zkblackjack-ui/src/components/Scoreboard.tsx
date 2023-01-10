@@ -44,18 +44,14 @@ export const Scoreboard: React.FC<IProps> = ({
               })
             : ""}
         </div>
-      </div>
-      <div
-        className={`row-start-4 ${
-          playerOneRound && playerOneRound!.length >= 10 ? "top-40" : "top-28"
-        } relative`}
-      >
-        {playerOneRound && playerOneRound!.length > 0 && (
-          <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
-        )}
+        <div className={`row-start-4 top-28 relative`}>
+          {playerOneRound && playerOneRound!.length > 0 && (
+            <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
+          )}
+        </div>
       </div>
       {!isSinglePlayer && (
-        <div className="col-start-2 col-span-1  ">
+        <div className="col-start-2 col-span-1 mt-6 ">
           <h1 className="border-b-2 border-b-white pb-2 border-opacity-20">
             {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
           </h1>
@@ -70,13 +66,7 @@ export const Scoreboard: React.FC<IProps> = ({
                 })
               : ""}
           </div>
-          <div
-            className={`row-start-4 ${
-              playerTwoRound && playerTwoRound!.length >= 10
-                ? "top-40"
-                : "top-28"
-            } relative`}
-          >
+          <div className={`row-start-4 top-28 relative`}>
             {playerTwoRound && playerTwoRound!.length > 0 && (
               <h1 className="font-poppins text-xl">
                 Score : {score.playerTwo}
