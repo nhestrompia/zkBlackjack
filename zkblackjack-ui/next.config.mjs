@@ -19,7 +19,7 @@ export default defineNextConfig({
     if (!options.isServer) {
       config.resolve.fallback.fs = false
     }
-    config.experiments = { asyncWebAssembly: true }
+    config.experiments = { asyncWebAssembly: true, layers: true }
     return config
   },
   // Next.js i18n docs: https://nextjs.org/docs/advanced-features/i18n-routing
