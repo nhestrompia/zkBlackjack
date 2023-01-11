@@ -597,42 +597,6 @@ export const Game: React.FC<IProps> = ({
     return deck
   }
 
-<<<<<<< HEAD
-  const getCard = (deckData: string[]) => {
-    if (sums.playerOneSum >= 21) {
-      toast.error("You can't get more cards", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-      })
-    } else {
-      const tempDeck = deckData
-      let playerValue = 0
-      const playerCard = tempDeck.pop()
-      const cardImage = `/cards/${playerCard}.svg`
-      const value = getValue(playerCard!)
-      playerValue += value!
-      if (value == 11) {
-        setAces({
-          ...aces,
-          playerOneAces: aces.playerOneAces + 1,
-        })
-      }
-      setCards({
-        ...cards,
-        playerOneCards: [...cards.playerOneCards, cardImage],
-      })
-
-      setSums({
-        ...sums,
-        playerOneSum: sums.playerOneSum + playerValue,
-      })
-      setCurrentDeck(tempDeck)
-=======
   function getCard(deckData: string[], player: string): CardGet | any {
     if (isSinglePlayer) {
       if (sums.playerOneSum >= 21) {
@@ -755,7 +719,6 @@ export const Game: React.FC<IProps> = ({
           }
         }
       }
->>>>>>> development
     }
   }
   console.log("current deck", currentDeck)
@@ -765,21 +728,10 @@ export const Game: React.FC<IProps> = ({
 
   const dealCards = (deckData: string[]) => {
     const usedDeck: string[] = deckData
-<<<<<<< HEAD
-
-    if (deckData.length >= 4) {
-      // setRoundText([])
-      // setSums({
-      //   playerOneSum: 0,
-      //   playerTwoSum: 0,
-      //   houseSum: 0,
-      // })
-=======
     console.log("got dealcards")
     if (usedDeck.length >= 4) {
       // setRoundText([])
       console.log("in if statement")
->>>>>>> development
       setAces({
         playerOneAces: 0,
         playerTwoAces: 0,
