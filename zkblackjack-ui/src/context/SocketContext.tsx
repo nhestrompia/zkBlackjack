@@ -6,7 +6,7 @@ import io, { Socket } from "socket.io-client"
 interface Context {
   socket: Socket
   aces: Ace
-  setAces: Function
+  setAces: (val: any) => void
   // username?: string;
   // setUsername: Function;
   // messages?: { message: string; time: string; username: string }[];
