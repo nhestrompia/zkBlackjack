@@ -193,7 +193,7 @@ export const Table: React.FC<IProps> = ({
 
   if (isSinglePlayer) {
     return (
-      <div className="   w-fit h-screen mt-2 ml-4 ">
+      <div className="   w-fit h-screen md:mt-20 lg:mt-2 mt-2 ml-4 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
         <div className="grid grid-cols-3  grid-rows-2 justify-center   items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
@@ -405,7 +405,7 @@ export const Table: React.FC<IProps> = ({
               </h1>
             </div>
           </div>
-          <div className="col-start-1 row-start-1">
+          <div className="col-start-1 md:mb-20 lg:mb-0 row-start-1">
             <Scoreboard
               score={score}
               isSinglePlayer={isSinglePlayer}
@@ -416,7 +416,7 @@ export const Table: React.FC<IProps> = ({
             />{" "}
           </div>
           {!isGameEnded && (
-            <div className="col-start-3 row-start-1 flex ml-24 mt-6 flex-col items-center  ">
+            <div className="col-start-3 md:row-start-3 md:col-start-2 lg:col-start-3  lg:row-start-1  -ml-8 flex  lg:ml-24 -mt-28  lg:mt-6 flex-row lg:flex-col items-center  ">
               <button
                 onClick={standHand}
                 className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"

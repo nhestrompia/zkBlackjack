@@ -21,9 +21,9 @@ export const Scoreboard: React.FC<IProps> = ({
 }) => {
   return (
     <div
-      className={`grid text-white font-poppins grid-cols-2 grid-rows-4 text-center mt-4 ${
+      className={`grid  text-white font-poppins grid-cols-2 grid-rows-4 text-center mt-4 ${
         isSinglePlayer ? "ml-16" : "ml-10"
-      } ml-10 justify-center w-64 h-64 bg-transparent rounded-xl`}
+      } ml-4 justify-center w-64 h-64 bg-transparent rounded-xl`}
     >
       <div
         className={`col-start-1 row-start-1 row-span-3  col-span-1  ${
@@ -44,7 +44,7 @@ export const Scoreboard: React.FC<IProps> = ({
               })
             : ""}
         </div>
-        <div className={`row-start-4 top-28 relative`}>
+        <div className={`row-start-4 md:top-8 lg:top-28 relative`}>
           {playerOneRound && playerOneRound!.length > 0 && (
             <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
           )}
