@@ -68,7 +68,7 @@ const Home: NextPage<IProps> = ({
   const constructDeck = () => {
     console.log("here utils")
 
-    let deck: string[] = []
+    const deck: string[] = []
 
     const cardValues: string[] = [
       "A",

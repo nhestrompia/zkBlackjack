@@ -12,33 +12,46 @@ interface Context {
   // messages?: { message: string; time: string; username: string }[];
   // setMessages: Function;
   startDeck: string[]
-  setStartDeck: Function
+  setStartDeck: (val: any) => void
 
   roomId?: string
   cards: Card
-  setCards: Function
+  setCards: (val: any) => void
   sums: Sum
-  setSums: Function
-  dealRoundCards: Function
+  setSums: (val: any) => void
+  dealRoundCards: (val: any) => RoundResult
   deckData: SocketData
-  setDeckData: Function
-  setIsGameActive: (val: boolean) => false
-  setIsSinglePlayer: (val: boolean) => false
+  setDeckData: (val: any) => void
+  setIsGameActive: (val: boolean) => void
+  setIsSinglePlayer: (val: boolean) => void
   isSinglePlayer: boolean
   isGameActive: boolean
-  setStand: (val: Stand) => false
+  setStand: (val: Stand) => void
   stand: Stand
-  setPlayerOneRound: Function
+  setPlayerOneRound: (val: any) => void
   playerOneRound: string[]
-  setPlayerTwoRound: Function
+  setPlayerTwoRound: (val: any) => void
   playerTwoRound: string[]
-  setScore: Function
+  setScore: (val: any) => void
   score: Score
   isCanWithdraw: Withdraw
-  setIsCanWithdraw: Function
-  setIsGameEnded: Function
+  setIsCanWithdraw: (val: any) => void
+  setIsGameEnded: (val: any) => void
   isGameEnded: boolean
   // rooms: object;
+}
+
+export interface RoundResult {
+  usedDeck: string[]
+  aceHouse: number
+  acePlayerOne: number
+  acePlayerTwo: number
+  houseValue: number
+  playerOneValue: number
+  playerTwoValue: number
+  housecurrentCards: string[]
+  playerOneCurrentCards: string[]
+  playerTwoCurrentCards: string[]
 }
 
 export interface Score {
@@ -139,7 +152,18 @@ const SocketContext = createContext<Context>({
   setIsCanWithdraw: (val: boolean) => false,
 
   setCards: () => false,
-  dealRoundCards: () => false,
+  dealRoundCards: () => ({
+    usedDeck: [],
+    aceHouse: 0,
+    acePlayerOne: 0,
+    acePlayerTwo: 0,
+    houseValue: 0,
+    playerOneValue: 0,
+    playerTwoValue: 0,
+    housecurrentCards: [],
+    playerOneCurrentCards: [],
+    playerTwoCurrentCards: [],
+  }),
   sums: {
     playerOneSum: 0,
     playerTwoSum: 0,
@@ -379,7 +403,7 @@ function SocketsProvider(props: any) {
 
   const dealRoundCards = (deckData: string[]) => {
     console.log("tried")
-    let usedDeck: string[] = deckData
+    const usedDeck: string[] = deckData
 
     if (deckData.length >= 6) {
       // setRoundText([])

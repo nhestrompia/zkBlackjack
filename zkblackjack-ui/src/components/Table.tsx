@@ -218,6 +218,7 @@ export const Table: React.FC<IProps> = ({
                       <div
                         className={` 
                         flex   mt-0.5`}
+                        key={card}
                       >
                         <Image
                           src={card}
@@ -229,7 +230,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div className="-ml-[8rem] md:-ml-[8rem]">
+                      <div key={card} className="-ml-[8rem] md:-ml-[8rem]">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}

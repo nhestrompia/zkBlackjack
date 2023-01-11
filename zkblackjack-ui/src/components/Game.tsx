@@ -727,7 +727,7 @@ export const Game: React.FC<IProps> = ({
   }, [sums])
 
   const dealCards = (deckData: string[]) => {
-    let usedDeck: string[] = deckData
+    const usedDeck: string[] = deckData
     console.log("got dealcards")
     if (usedDeck.length >= 4) {
       // setRoundText([])
