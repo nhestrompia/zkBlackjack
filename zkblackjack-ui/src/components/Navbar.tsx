@@ -28,7 +28,7 @@ export const Navbar: React.FC<IProps> = ({
   //tooltip rules for game pages
 
   return (
-    <div className=" fixed top-0 w-full grid grid-cols-3 my-2 mx-2 justify-center items-center">
+    <div className=" fixed z-10 top-0 w-full grid grid-cols-3 my-2 mx-2 justify-center items-center">
       <Link href={"/"}>
         <h1 className="cursor-pointer text-3xl col-start-1 font-lobster text-white leading-normal font-bold  ">
           zkBlackjack

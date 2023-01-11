@@ -530,7 +530,7 @@ export const Table: React.FC<IProps> = ({
               )}
             </div>
             <div
-              className={` row-start-1 pt-10  w-fit ${
+              className={`hidden md:flex row-start-1 pt-10  w-fit ${
                 isLoading ? "opacity-60" : "opacity-20"
               } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
             >
@@ -542,15 +542,27 @@ export const Table: React.FC<IProps> = ({
                 layout={"fixed"}
               />
             </div>
-            <div className="relative -z-10 bottom-8 ml-6">
-              <Image
-                className="opacity-30"
-                src={"/text.svg"}
-                width={581}
-                height={131}
-                layout="fixed"
-              />
-            </div>
+            {!isLoading ? (
+              <div className="relative hidden lg:flex -z-10 bottom-8 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/text.svg"}
+                  width={581}
+                  height={131}
+                  layout="fixed"
+                />
+              </div>
+            ) : (
+              <div className="relative hidden lg:flex -z-10 -mb-5 bottom-7 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/final.svg"}
+                  width={664}
+                  height={155}
+                  layout="fixed"
+                />
+              </div>
+            )}
           </div>
           <div className="col-start-1 col-span-3 bottom-32 row-start-2 flex justify-evenly relative right-16">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  relative left-52 w-fit  md:mb-20">
@@ -579,7 +591,9 @@ export const Table: React.FC<IProps> = ({
             </div>
 
             <div
-              className={`flex justify-evenly max-w-fit relative left-7 md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
+              className={`flex justify-evenly max-w-fit relative ${
+                playerTwo === "" ? "left-20" : "left-12"
+              }  md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
             >
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
               House
@@ -660,33 +674,6 @@ export const Table: React.FC<IProps> = ({
                       />
                     </div>
                   </div>
-                  //                 <div>
-                  //                   <div
-                  //                     className={`relative ${
-                  //                       account ? "left-[77px]" : "left-[52px]"
-                  //                     } `}
-                  //                   >
-                  //                     <Image
-                  //                       src={"/cards/back.svg"}
-                  //                       width={120}
-                  //                       height={120}
-                  //                       layout="fixed"
-                  //                     />
-                  //                   </div>
-                  //                   <div
-                  //                     className={`
-                  // -ml-[6rem] md:-ml-[10.5rem] relative ${
-                  //   account ? "left-[77px]" : "left-[52px]"
-                  // } `}
-                  //                   >
-                  //                     <Image
-                  //                       src={"/cards/back.svg"}
-                  //                       width={120}
-                  //                       height={120}
-                  //                       layout="fixed"
-                  //                     />
-                  //                   </div>
-                  //                 </div>
                 )
               ) : cards.playerOneCards.length > 0 ? (
                 cards.playerOneCards.map((card, index) => {
