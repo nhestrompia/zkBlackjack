@@ -1,27 +1,29 @@
 import React, { useEffect } from "react"
 import truncateEthAddress from "truncate-eth-address"
-import { RoundResult, Score } from "./Game"
+import { Score } from "../context/SocketContext"
 
 interface IProps {
   playerOne: string
-  roundText: RoundResult
   playerTwo: string
   isSinglePlayer: boolean
   score: Score
+  playerOneRound: string[]
+  playerTwoRound?: string[]
 }
 
 export const Scoreboard: React.FC<IProps> = ({
   playerOne,
-  roundText,
+  playerOneRound,
+  playerTwoRound,
   isSinglePlayer,
   playerTwo,
   score,
 }) => {
   return (
     <div
-      className={`grid text-white font-poppins grid-cols-2 grid-rows-4 text-center mt-4 ${
+      className={`grid  text-white font-poppins grid-cols-2 grid-rows-4 text-center mt-4 ${
         isSinglePlayer ? "ml-16" : "ml-10"
-      } ml-10 justify-center w-64 h-64 bg-transparent rounded-xl`}
+      } ml-4 justify-center w-64 h-64 bg-transparent rounded-xl`}
     >
       <div
         className={`col-start-1 row-start-1 row-span-3  col-span-1  ${
@@ -32,8 +34,8 @@ export const Scoreboard: React.FC<IProps> = ({
           {playerOne ? truncateEthAddress(playerOne) : "Player 1"}
         </h1>
         <div className="mt-2 flex flex-col h-full">
-          {roundText
-            ? roundText.playerOne.map((round: string, index: number) => {
+          {playerOneRound!
+            ? playerOneRound!.map((round: string, index: number) => {
                 return (
                   <h1 className="" key={index}>
                     {round}
@@ -42,24 +44,20 @@ export const Scoreboard: React.FC<IProps> = ({
               })
             : ""}
         </div>
-      </div>
-      <div
-        className={`row-start-4 ${
-          roundText.playerOne.length >= 10 ? "top-40" : "top-28"
-        } relative`}
-      >
-        {roundText.playerOne.length > 0 && (
-          <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
-        )}
+        <div className={`row-start-4 md:top-8 lg:top-28 relative`}>
+          {playerOneRound && playerOneRound!.length > 0 && (
+            <h1 className="font-poppins text-xl">Score : {score.playerOne}</h1>
+          )}
+        </div>
       </div>
       {!isSinglePlayer && (
-        <div className="col-start-2 col-span-1  ">
+        <div className="col-start-2 col-span-1 mt-6 ">
           <h1 className="border-b-2 border-b-white pb-2 border-opacity-20">
             {playerTwo ? truncateEthAddress(playerTwo) : "Player 2"}
           </h1>
           <div className="mt-2">
-            {roundText
-              ? roundText.playerTwo.map((round: string, index: number) => {
+            {playerTwoRound!
+              ? playerTwoRound!.map((round: string, index: number) => {
                   return (
                     <h1 className="" key={index}>
                       {round}
@@ -67,6 +65,13 @@ export const Scoreboard: React.FC<IProps> = ({
                   )
                 })
               : ""}
+          </div>
+          <div className={`row-start-4 top-28 relative`}>
+            {playerTwoRound && playerTwoRound!.length > 0 && (
+              <h1 className="font-poppins text-xl">
+                Score : {score.playerTwo}
+              </h1>
+            )}
           </div>
         </div>
       )}

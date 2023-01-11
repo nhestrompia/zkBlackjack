@@ -6,27 +6,62 @@ import io, { Socket } from "socket.io-client"
 interface Context {
   socket: Socket
   aces: Ace
-  setAces: (val: Ace) => false
+  setAces: (val: any) => void
   // username?: string;
   // setUsername: Function;
   // messages?: { message: string; time: string; username: string }[];
   // setMessages: Function;
   startDeck: string[]
-  setStartDeck: (val: string[]) => false
+  setStartDeck: (val: any) => void
 
   roomId?: string
   cards: Card
-  setCards: (val: Card) => void
+  setCards: (val: any) => void
   sums: Sum
-  setSums: (val: Sum) => void
-  dealCards: (val: string[]) => void
+  setSums: (val: any) => void
+  dealRoundCards: (val: any) => RoundResult
   deckData: SocketData
-  setDeckData: (val: SocketData) => void
+  setDeckData: (val: any) => void
   setIsGameActive: (val: boolean) => void
   setIsSinglePlayer: (val: boolean) => void
   isSinglePlayer: boolean
   isGameActive: boolean
+  setStand: (val: Stand) => void
+  stand: Stand
+  setPlayerOneRound: (val: any) => void
+  playerOneRound: string[]
+  setPlayerTwoRound: (val: any) => void
+  playerTwoRound: string[]
+  setScore: (val: any) => void
+  score: Score
+  isCanWithdraw: Withdraw
+  setIsCanWithdraw: (val: any) => void
+  setIsGameEnded: (val: any) => void
+  isGameEnded: boolean
   // rooms: object;
+}
+
+export interface RoundResult {
+  usedDeck: string[]
+  aceHouse: number
+  acePlayerOne: number
+  acePlayerTwo: number
+  houseValue: number
+  playerOneValue: number
+  playerTwoValue: number
+  housecurrentCards: string[]
+  playerOneCurrentCards: string[]
+  playerTwoCurrentCards: string[]
+}
+
+export interface Score {
+  playerOne: number
+  playerTwo: number
+}
+
+export interface Withdraw {
+  playerOne: boolean
+  playerTwo: boolean
 }
 
 interface SocketData {
@@ -43,6 +78,11 @@ interface PlayerInfo {
   sum: number
 }
 
+export interface Stand {
+  playerOne: boolean
+  playerTwo: boolean
+}
+
 export interface Ace {
   playerOneAces: number
   playerTwoAces: number
@@ -55,9 +95,9 @@ export interface Card {
 }
 
 export interface Cards {
-  playerOneCards: Card[]
-  playerTwoCards: Card[]
-  houseCards: Card[]
+  playerOneCards: string[]
+  playerTwoCards: string[]
+  houseCards: string[]
 }
 
 export interface Sum {
@@ -70,9 +110,15 @@ const socket = io("https://zkblackjack.onrender.com/")
 
 const SocketContext = createContext<Context>({
   socket,
+  isGameEnded: false,
+  setIsGameEnded: (val: boolean) => false,
   isSinglePlayer: false,
   setIsSinglePlayer: (val: boolean) => false,
   setDeckData: () => false,
+  setPlayerOneRound: () => false,
+  setPlayerTwoRound: () => false,
+  playerOneRound: [],
+  playerTwoRound: [],
   deckData: {
     room: "",
     deckCards: [],
@@ -92,6 +138,11 @@ const SocketContext = createContext<Context>({
       aces: 0,
     },
   },
+  setScore: (val: Score) => false,
+  score: {
+    playerOne: 0,
+    playerTwo: 0,
+  },
   startDeck: [],
   aces: {
     playerOneAces: 0,
@@ -104,15 +155,33 @@ const SocketContext = createContext<Context>({
     playerTwoCards: [],
     houseCards: [],
   },
+  isCanWithdraw: { playerOne: false, playerTwo: false },
+  setIsCanWithdraw: (val: boolean) => false,
+
   setCards: () => false,
-  dealCards: (val: string[]) => false,
+  dealRoundCards: () => ({
+    usedDeck: [],
+    aceHouse: 0,
+    acePlayerOne: 0,
+    acePlayerTwo: 0,
+    houseValue: 0,
+    playerOneValue: 0,
+    playerTwoValue: 0,
+    housecurrentCards: [],
+    playerOneCurrentCards: [],
+    playerTwoCurrentCards: [],
+  }),
   sums: {
     playerOneSum: 0,
     playerTwoSum: 0,
     houseSum: 0,
   },
   setSums: () => false,
-
+  setStand: () => false,
+  stand: {
+    playerOne: false,
+    playerTwo: false,
+  },
   setIsGameActive: (val: boolean) => false,
   setStartDeck: (val: string[]) => false,
   roomId: "",
@@ -121,6 +190,19 @@ const SocketContext = createContext<Context>({
 
 function SocketsProvider(props: any) {
   const [startDeck, setStartDeck] = useState<string[]>([])
+  // const [isGameStarted, setIsGameStarted] = useState<boolean>(false)
+  const [isGameEnded, setIsGameEnded] = useState<boolean>(false)
+
+  const [playerOneRound, setPlayerOneRound] = useState<string[]>([])
+  const [playerTwoRound, setPlayerTwoRound] = useState<string[]>([])
+  const [score, setScore] = useState<Score>({
+    playerOne: 0,
+    playerTwo: 0,
+  })
+  const [stand, setStand] = useState<Stand>({
+    playerOne: false,
+    playerTwo: false,
+  })
   const [deckData, setDeckData] = useState<SocketData>({
     room: "",
     deckCards: [],
@@ -155,7 +237,10 @@ function SocketsProvider(props: any) {
     playerTwoAces: 0,
     houseAces: 0,
   })
-
+  const [isCanWithdraw, setIsCanWithdraw] = useState<Withdraw>({
+    playerOne: false,
+    playerTwo: false,
+  })
   const [isGameActive, setIsGameActive] = useState(false)
   const [isSinglePlayer, setIsSinglePlayer] = useState(false)
 
@@ -166,7 +251,33 @@ function SocketsProvider(props: any) {
 
   // setCards((prevCards) => ({ ...prevCards, playerOneCards: newCards }));
 
-  // const dealCards = (deckData: string[]) => {
+  const getValue = (card: string) => {
+    const data = card?.split("-")
+    const value = data[0]
+
+    const check = /\d/.test(value!)
+
+    if (check == false) {
+      if (value == "A") {
+        return 11
+      }
+      return 10
+    } else {
+      return parseInt(value!)
+    }
+  }
+
+  //   useEffect(() => {
+  //   if (!socket) {
+  //     setSocket(io("http://localhost:3001"))
+  //   }
+
+  //   return () => {
+  //     socket?.disconnect()
+  //   }
+  // }, [])
+
+  // const dealRoundCards = (deckData: string[]) => {
   //   let usedDeck: string[] = deckData
 
   //   if (deckData.length >= 4) {
@@ -176,6 +287,16 @@ function SocketsProvider(props: any) {
   //       playerOneAces: 0,
   //       playerTwoAces: 0,
   //       houseAces: 0,
+  //     })
+  //     setCards({
+  //       playerOneCards: [],
+  //       playerTwoCards: [],
+  //       houseCards: [],
+  //     })
+  //     setSums({
+  //       playerOneSum: 0,
+  //       playerTwoSum: 0,
+  //       houseSum: 0,
   //     })
 
   //     // setIsStand(false)
@@ -191,7 +312,7 @@ function SocketsProvider(props: any) {
   //       housecurrentCards.push(cardImage)
   //       if (value == 11) {
   //         // setAces({...aces, houseAces : aces.houseAces + 1})
-  //         setAces((prevAces) => ({
+  //         setAces((prevAces: any) => ({
   //           ...prevAces,
   //           houseAces: prevAces.houseAces + 1,
   //         }))
@@ -208,7 +329,7 @@ function SocketsProvider(props: any) {
 
   //       const value = getValue(dealerCard!)
   //       if (value == 11) {
-  //         setAces((prevAces) => ({
+  //         setAces((prevAces: any) => ({
   //           ...prevAces,
   //           houseAces: prevAces.houseAces + 1,
   //         }))
@@ -217,19 +338,18 @@ function SocketsProvider(props: any) {
   //       houseValue += value!
   //     }
 
-  //     // setHouseSum((prevState: number) => prevState + houseValue)
-  //     setSums((prevSums) => ({
+  //     setSums((prevSums: any) => ({
   //       ...prevSums,
   //       houseSum: prevSums.houseSum + houseValue,
   //     }))
-  //     setCards((prevCards) => ({ ...prevCards, houseCards: housecurrentCards }))
-
-  //     // setHouseCards(housecurrentCards)
+  //     setCards((prevCards: any) => ({
+  //       ...prevCards,
+  //       houseCards: housecurrentCards,
+  //     }))
 
   //     let playerOneValue = 0
-  //     let playerTwoValue = 0
+
   //     const playerOneCurrentCards: string[] = []
-  //     const playerTwoCurrentCards: string[] = []
 
   //     for (let i = 0; i < 2; i++) {
   //       const playerCard = usedDeck.pop()
@@ -239,52 +359,22 @@ function SocketsProvider(props: any) {
   //       playerOneValue += value!
   //       if (value == 11) {
   //         // setAceNumberPlayerOne((prevState) => prevState + 1)
-  //         setAces((prevAces) => ({
+  //         setAces((prevAces: any) => ({
   //           ...prevAces,
   //           playerOneAces: prevAces.playerOneAces + 1,
   //         }))
   //       }
   //     }
-  //     for (let i = 0; i < 2; i++) {
-  //       const playerCard = usedDeck.pop()
-  //       const cardImage = `/cards/${playerCard}.svg`
-  //       playerTwoCurrentCards.push(cardImage)
-  //       const value = getValue(playerCard!)
-  //       playerTwoValue += value!
-  //       if (value == 11) {
-  //         setAces((prevAces) => ({
-  //           ...prevAces,
-  //           playerTwoAces: prevAces.playerTwoAces + 1,
-  //         }))
-  //       }
-  //     }
-  //     setCards((prevCards) => ({
+
+  //     setCards((prevCards: any) => ({
   //       ...prevCards,
   //       playerOneCards: playerOneCurrentCards,
-  //       playerTwoCards: playerTwoCurrentCards,
   //     }))
-  //     setSums((prevSums) => ({
+  //     setSums((prevSums: any) => ({
   //       ...prevSums,
   //       playerOneSum: prevSums.playerOneSum + playerOneValue,
-  //       playerTwoSum: prevSums.playerTwoSum + playerTwoValue,
   //     }))
   //     setStartDeck(usedDeck)
-
-  //     // setPlayerOneCards(playerOneCurrentCards)
-  //     // setPlayerOneSum(playerOneValue)
-  //     // setPlayerTwoCards(playerTwoCurrentCards)
-  //     // setPlayerTwoSum(playerTwoValue)
-
-  //     const emitData = {
-  //       playerOneCards: playerOneCurrentCards,
-  //       playerTwoCards: playerTwoCurrentCards,
-  //       playerOneSum: sums.playerOneSum,
-  //       playerTwoSum: sums.playerTwoSum,
-  //       houseSum: sums.houseSum,
-  //       houseCards: housecurrentCards,
-  //     }
-
-  //     socket.emit("card_dealt", emitData)
 
   //     if (
   //       deckData.length <= 4 &&
@@ -304,87 +394,404 @@ function SocketsProvider(props: any) {
   //       // })
   //     }
   //   } else {
-  //     // setIsGameActive(false)
+  //     // toast.error("No more cards left. This is the final round!", {
+  //     //   position: "top-center",
+  //     //   autoClose: 3000,
+  //     //   hideProgressBar: true,
+  //     //   closeOnClick: true,
+  //     //   pauseOnHover: false,
+  //     //   draggable: true,
+  //     //   progress: undefined,
+  //     // })
+  //     setIsGameActive(false)
+  //     // setIsGameEnded(true)
   //   }
   // }
 
-  //   useEffect(() => {
-  //   if (!socket) {
-  //     setSocket(io("http://localhost:3001"))
+  const dealRoundCards = (deckData: string[]) => {
+    console.log("tried")
+    const usedDeck: string[] = deckData
+
+    if (deckData.length >= 6) {
+      // setRoundText([])
+
+      setAces({
+        playerOneAces: 0,
+        playerTwoAces: 0,
+        houseAces: 0,
+      })
+      setCards({
+        playerOneCards: [],
+        playerTwoCards: [],
+        houseCards: [],
+      })
+      setSums({
+        playerOneSum: 0,
+        playerTwoSum: 0,
+        houseSum: 0,
+      })
+
+      let aceHouse = 0
+      let acePlayerOne = 0
+      let acePlayerTwo = 0
+
+      // setIsStand(false)
+      let houseValue = 0
+      const housecurrentCards: string[] = []
+      for (let i = 0; i < 2; i++) {
+        const dealerCard = usedDeck?.pop()
+
+        const cardImage = `/cards/${dealerCard}.svg`
+
+        const value = getValue(dealerCard!)
+        houseValue += value!
+        housecurrentCards.push(cardImage)
+        if (value == 11) {
+          // setAces({...aces, houseAces : aces.houseAces + 1})
+          setAces((prevAces: Ace) => ({
+            ...prevAces,
+            houseAces: prevAces.houseAces + 1,
+          }))
+          aceHouse += 1
+        }
+      }
+
+      while (houseValue < 17) {
+        if (usedDeck.length === 2) {
+          break
+        }
+        const dealerCard = usedDeck.pop()
+        const cardImage = `/${dealerCard}.png`
+        housecurrentCards.push(cardImage)
+
+        const value = getValue(dealerCard!)
+        if (value == 11) {
+          setAces((prevAces: Ace) => ({
+            ...prevAces,
+            houseAces: prevAces.houseAces + 1,
+          }))
+          aceHouse += 1
+        }
+
+        houseValue += value!
+      }
+
+      let playerOneValue = 0
+      let playerTwoValue = 0
+
+      const playerOneCurrentCards: string[] = []
+      const playerTwoCurrentCards: string[] = []
+
+      for (let i = 0; i < 2; i++) {
+        const playerCard = usedDeck.pop()
+        const cardImage = `/cards/${playerCard}.svg`
+        playerOneCurrentCards.push(cardImage)
+        const value = getValue(playerCard!)
+        playerOneValue += value!
+        if (value == 11) {
+          // setAceNumberPlayerOne((prevState) => prevState + 1)
+          setAces((prevAces: Ace) => ({
+            ...prevAces,
+            playerOneAces: prevAces.playerOneAces + 1,
+          }))
+
+          acePlayerOne += 1
+        }
+      }
+      for (let i = 0; i < 2; i++) {
+        const playerCard = usedDeck.pop()
+        const cardImage = `/cards/${playerCard}.svg`
+        playerTwoCurrentCards.push(cardImage)
+        const value = getValue(playerCard!)
+        playerTwoValue += value!
+        if (value == 11) {
+          // setAceNumberPlayerOne((prevState) => prevState + 1)
+          setAces((prevAces: Ace) => ({
+            ...prevAces,
+            playerTwoAces: prevAces.playerTwoAces + 1,
+          }))
+          acePlayerTwo += 1
+        }
+      }
+
+      setCards({
+        houseCards: housecurrentCards,
+        playerOneCards: playerOneCurrentCards,
+        playerTwoCards: playerTwoCurrentCards,
+      })
+      setSums((prevSums: Sum) => ({
+        houseSum: houseValue,
+        playerOneSum: playerOneValue,
+        playerTwoSum: playerTwoValue,
+      }))
+      setStartDeck(usedDeck)
+
+      if (startDeck.length <= 6) {
+        setIsGameActive(false)
+        setIsGameEnded(true)
+        setStand({
+          playerOne: true,
+          playerTwo: true,
+        })
+      }
+
+      return {
+        usedDeck,
+        aceHouse,
+        acePlayerOne,
+        acePlayerTwo,
+        houseValue,
+        playerOneValue,
+        playerTwoValue,
+        housecurrentCards,
+        playerOneCurrentCards,
+        playerTwoCurrentCards,
+      }
+
+      if (
+        startDeck.length <= 4 &&
+        cards.playerOneCards.length < 2 &&
+        cards.playerTwoCards.length < 2
+      ) {
+        // setIsGameActive(false)
+        // setIsStand(true)
+        // toast.error("No more cards left. This is the final round!", {
+        //   position: "top-center",
+        //   autoClose: 3000,
+        //   hideProgressBar: true,
+        //   closeOnClick: true,
+        //   pauseOnHover: false,
+        //   draggable: true,
+        //   progress: undefined,
+        // })
+      }
+    } else {
+      // toast.error("No more cards left. This is the final round!", {
+      //   position: "top-center",
+      //   autoClose: 3000,
+      //   hideProgressBar: true,
+      //   closeOnClick: true,
+      //   pauseOnHover: false,
+      //   draggable: true,
+      //   progress: undefined,
+      // })
+      setIsGameActive(false)
+      // setIsGameEnded(true)
+    }
+  }
+
+  // const constructDeck = () => {
+  //   console.log("here utils")
+
+  //   let deck: string[] = []
+
+  //   const cardValues: string[] = [
+  //     "A",
+  //     "2",
+  //     "3",
+  //     "4",
+  //     "5",
+  //     "6",
+  //     "7",
+  //     "8",
+  //     "9",
+  //     "10",
+  //     "J",
+  //     "Q",
+  //     "K",
+  //   ]
+  //   const cardTypes: string[] = ["D", "C", "H", "S"]
+
+  //   for (let i = 0; i < 2; i++) {
+  //     for (let i = 0; i < cardTypes.length; i++) {
+  //       for (let j = 0; j < cardValues.length; j++) {
+  //         deck.push(cardValues[j] + "-" + cardTypes[i])
+  //       }
+  //     }
   //   }
 
-  //   return () => {
-  //     socket?.disconnect()
+  //   for (let i = 0; i < deck.length; i++) {
+  //     const randomNumber = Math.floor(Math.random() * deck.length)
+  //     const currentCard = deck[i]
+  //     deck[i] = deck[randomNumber] ?? ""
+  //     deck[randomNumber] = currentCard ?? ""
   //   }
+
+  //   return deck
+  // }
+
+  // useEffect(() => {
+  //   setStartDeck([])
+  //   setAces({
+  //     playerOneAces: 0,
+  //     playerTwoAces: 0,
+  //     houseAces: 0,
+  //   })
+  //   setCards({
+  //     playerOneCards: [],
+  //     playerTwoCards: [],
+  //     houseCards: [],
+  //   })
+  //   setSums({
+  //     playerOneSum: 0,
+  //     playerTwoSum: 0,
+  //     houseSum: 0,
+  //   })
   // }, [])
+  console.log("startdeck", startDeck)
+  console.log("cards", cards)
+  console.log("stand  ", stand)
+  console.log("sums", sums)
 
   useEffect(() => {
-    socket.on("new_player", (data) => {
+    socket.once("new_player", (data) => {
       // setStartDeck(data.deckData)
-      // setCards({
-      //   playerOneCards: data.player1.cards,
-      //   playerTwoCards: data.player2.cards,
-      //   houseCards: data.house.cards,
-      // })
-      // setSums({
-      //   playerOneSum: data.player1.sum,
-      //   playerTwoSum: data.player1.sum,
-      //   houseSum: data.house.sum,
-      // })
-      // setAces({
-      //   playerOneAces: data.player1.aces,
-      //   playerTwoAces: data.player2.aces,
-      //   houseAces: data.house.aces,
-      // })
-      setDeckData({
-        room: data.room,
-        deckCards: data.deckData,
-        house: {
-          cards: data.house.cards,
-          sum: data.house.sum,
-          aces: data.house.aces,
-        },
-        player1: {
-          cards: data.player1.cards,
-          sum: data.player1.sum,
-          aces: data.player1.aces,
-        },
-        player2: {
-          cards: data.player2.cards,
-          sum: data.player2.sum,
-          aces: data.player2.aces,
-        },
+
+      // const newDeck = constructDeck()
+      console.log("here? cont")
+
+      // dealRoundCards(newDeck)
+      setIsSinglePlayer(false)
+      setCards({
+        playerOneCards: data.cards.playerOne,
+        playerTwoCards: data.cards.playerTwo,
+        houseCards: data.cards.house,
       })
-      // dealCards(data)
+      setSums({
+        playerOneSum: data.sums.playerOne,
+        playerTwoSum: data.sums.playerTwo,
+        houseSum: data.sums.house,
+      })
+      setAces({
+        playerOneAces: data.aces.playerOne,
+        playerTwoAces: data.aces.playerTwo,
+        houseAces: data.aces.house,
+      })
+      setStartDeck(data.deck)
+
+      // const emitData = {
+      //   deck: startDeck,
+      //   cards: cards,
+      //   sums: sums,
+      //   aces: aces,
+      // }
+
+      // socket.emit("card_dealt", emitData)
+      console.log("data", data)
+      // console.log("socket deck", newDeck)
+      setIsSinglePlayer(false)
+      // dealRoundCards(data)
       // setIsGameStarted(true)
       setIsGameActive(true)
     })
 
-    socket.on("got_card", (data) => {
-      setDeckData((prevState) => ({
-        ...prevState,
-        deckCards: data.deckData,
-        player1: {
-          cards: data.player1.cards,
-          sum: data.player1.sum,
-          aces: data.player1.aces,
-        },
-        player2: {
-          cards: data.player2.cards,
-          sum: data.player2.sum,
-          aces: data.player2.aces,
-        },
-      }))
+    socket.once("new_round", (data) => {
+      setStand({
+        playerOne: false,
+        playerTwo: false,
+      })
+      setCards({
+        playerOneCards: data.cards.playerOne,
+        playerTwoCards: data.cards.playerTwo,
+        houseCards: data.cards.house,
+      })
+      setSums({
+        playerOneSum: data.sums.playerOne,
+        playerTwoSum: data.sums.playerTwo,
+        houseSum: data.sums.house,
+      })
+      setAces({
+        playerOneAces: data.aces.playerOne,
+        playerTwoAces: data.aces.playerTwo,
+        houseAces: data.aces.house,
+      })
+      setStartDeck(data.deck)
+      setScore(data.score)
     })
 
-    socket.on("current_deck", (data) => {
-      // setStartDeck(data.deck)
-      // setCards({
-      //   playerOneCards: data.playerOneCards,
-      //   playerTwoCards: data.playerTwoCards,
-      //   houseCards: data.houseCards,
-      // })
+    socket.on("stand_hand", (data) => {
+      if (data.player === "1") {
+        setPlayerOneRound((prevState: string[]) => [...prevState, data.round])
+        setStand((prevState: Stand) => ({
+          ...prevState,
+          playerOne: true,
+        }))
+        // setScore((prevState: Score) => ({
+        //   ...prevState,
+        //   playerOne: data.score.playerOne,
+        // }))
+      } else {
+        setPlayerTwoRound((prevState: string[]) => [...prevState, data.round])
+        setStand((prevState: Stand) => ({
+          ...prevState,
+          playerTwo: true,
+        }))
+        // setScore((prevState: Score) => ({
+        //   ...prevState,
+        //   playerOne: data.score.playerTwo,
+        // }))
+      }
     })
+
+    socket.once("got_card", (data) => {
+      // setDeckData((prevState) => ({
+      //   ...prevState,
+      //   deckCards: data.deckData,
+      //   player1: {
+      //     cards: data.player1.cards,
+      //     sum: data.player1.sum,
+      //     aces: data.player1.aces,
+      //   },
+      //   player2: {
+      //     cards: data.player2.cards,
+      //     sum: data.player2.sum,
+      //     aces: data.player2.aces,
+      //   },
+      // }))
+      console.log("counter")
+      setStartDeck(data.deck)
+      if (data.player === "1") {
+        setCards((prevState) => ({
+          ...prevState,
+          playerOneCards: [...prevState.playerOneCards, data.card],
+        }))
+        setSums((prevState) => ({
+          ...prevState,
+          playerOneSum: prevState.playerOneSum + data.sum,
+        }))
+      } else {
+        setCards((prevState) => ({
+          ...prevState,
+          playerTwoCards: [...prevState.playerTwoCards, data.card],
+        }))
+        setSums((prevState) => ({
+          ...prevState,
+          playerTwoSum: prevState.playerTwoSum + data.sum,
+        }))
+      }
+    })
+
+    // socket.on("current_deck", (data) => {
+    // setCards(data.cards)
+    // setSums(data.sums)
+    // setAces(data.aces)
+    // setStartDeck(data.deck)
+    // setCards({
+    //   playerOneCards: data.playerOneCards,
+    //   playerTwoCards: data.playerTwoCards,
+    //   houseCards: data.houseCards,
+    // })
+    // })
+
+    return () => {
+      socket.off("new_player")
+      socket.off("got_card")
+      socket.off("stand_hand")
+      socket.off("new_round")
+      // socket.off('new_player');
+      // socket.off('disconnect');
+      // socket.off('pong');
+    }
 
     // socket.on()
   }, [socket])
@@ -406,7 +813,19 @@ function SocketsProvider(props: any) {
         isGameActive,
         isSinglePlayer,
         setIsSinglePlayer,
-        // dealCards,
+        dealRoundCards,
+        setPlayerOneRound,
+        playerOneRound,
+        setPlayerTwoRound,
+        playerTwoRound,
+        stand,
+        setStand,
+        setScore,
+        score,
+        setIsCanWithdraw,
+        isCanWithdraw,
+        setIsGameEnded,
+        isGameEnded,
       }}
       {...props}
     />

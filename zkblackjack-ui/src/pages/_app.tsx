@@ -1,16 +1,17 @@
-import "../styles/globals.css";
-import type { AppType } from "next/dist/shared/lib/utils";
-import React, { useState, useRef, useEffect, useImperativeHandle } from "react";
-import { ethers } from "ethers";
-import { Navbar } from "../components/Navbar";
-import io, { Socket } from "socket.io-client";
+import "../styles/globals.css"
+import type { AppType } from "next/dist/shared/lib/utils"
+import React, { useState, useRef, useEffect, useImperativeHandle } from "react"
+import { ethers } from "ethers"
+import { Navbar } from "../components/Navbar"
+import io, { Socket } from "socket.io-client"
 // import { socket, SocketProvider } from "../../context/socket"
-import SocketsProvider from "../context/SocketContext";
+import SocketsProvider from "../context/SocketContext"
 
 const MyApp: AppType = ({ Component, pageProps }) => {
-  const [library, setLibrary] = useState<ethers.providers.Web3Provider>();
-  const [account, setAccount] = useState<string>("");
-  const [provider, setProvider] = useState();
+  const [library, setLibrary] = useState<ethers.providers.Web3Provider>()
+  const [account, setAccount] = useState<string>("")
+  const [provider, setProvider] = useState()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   // const [socket, setSocket] = useState<Socket>()
   // const [isSinglePlayer, setIsSinglePlayer] = useState<boolean>(false);
   // const [isGameActive, setIsGameActive] = useState<boolean>(false);
@@ -73,6 +74,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           {...pageProps}
           library={library!}
           account={account}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
           // isSinglePlayer={isSinglePlayer}
           // setIsSinglePlayer={setIsSinglePlayer}
           // isGameActive={isGameActive}
@@ -81,7 +84,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         />
       </SocketsProvider>
     </>
-  );
-};
+  )
+}
 
-export default MyApp;
+export default MyApp

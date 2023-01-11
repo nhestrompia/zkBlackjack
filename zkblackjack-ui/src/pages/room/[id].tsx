@@ -8,9 +8,16 @@ import { ethers } from "ethers"
 interface IProps {
   account: string
   library: ethers.providers.Web3Provider
+  setIsLoading: (val: boolean) => void
+  isLoading: boolean
 }
 
-const Room: NextPage<IProps> = ({ account, library }) => {
+const Room: NextPage<IProps> = ({
+  account,
+  library,
+  setIsLoading,
+  isLoading,
+}) => {
   const router = useRouter()
 
   const { id } = router.query
@@ -19,7 +26,13 @@ const Room: NextPage<IProps> = ({ account, library }) => {
 
   return (
     <div className="h-screen w-fit overflow-hidden">
-      <Game room={room} account={account} library={library} />
+      <Game
+        setIsLoading={setIsLoading}
+        isLoading={isLoading}
+        room={room}
+        account={account}
+        library={library}
+      />
     </div>
   )
 }

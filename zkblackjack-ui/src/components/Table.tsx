@@ -10,27 +10,39 @@ import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,
 } from "../../constants"
-import { useSockets } from "../context/SocketContext"
-import { RoundResult, Score } from "./Game"
-import { getCreate2Address } from "ethers/lib/utils"
+import { useSockets, Withdraw } from "../context/SocketContext"
+import { Score } from "../context/SocketContext"
+
+type CardGet = {
+  startDeck?: string[] | undefined
+  tempDeck?: string[] | undefined
+  cardImage?: string | undefined
+  playerValue?: number | undefined
+}
 
 interface IProps {
   account: string
   // socket: any
   score: Score
   room?: string
+  isLoading: boolean
   isGameEnded: boolean
-  isSinglePlayer: boolean
+  // isSinglePlayer: boolean
   currentDeck?: string[]
   calculateProof: (val: string) => void
   // getCard: (val: string[]) => void
 
   library: ethers.providers.Web3Provider
-  getCard?: (val: string[]) => void
-  roundText: RoundResult
+  getCard?: (val: string[], player: string) => CardGet
+  playerOneRound: string[]
+  playerTwoRound: string[]
+  playerOne: string
+  setPlayerOne: (val: string) => void
+  playerTwo: string
+  setPlayerTwo: (val: string) => void
   // unlockBet : (playerAddress : string, player : string) => void
   withdrawBet: (val: string) => void
-  isCanWithdraw: boolean
+  // isCanWithdraw: Withdraw
   // getWinner: () => void
 }
 
@@ -48,36 +60,6 @@ interface PlayerInfo {
   sum: number
 }
 
-// const ACTIONS = {
-//   WIN_ROUND: "win-round",
-//   LOSE_ROUND: "lose-round",
-//   DRAW_ROUND: "draw-round",
-// }
-
-// enum LeaderboardActionKind {
-//   WIN_ROUND = "win-round",
-//   LOSE_ROUND = "lose-round",
-//   DRAW_ROUND = "draw-round",
-// }
-
-// interface LeaderboardAction {
-//   type: LeaderboardActionKind
-//   payload: string
-// }
-
-// const reducer = (state: Array<string>, action: LeaderboardAction) => {
-//   switch (action.type) {
-//     case LeaderboardActionKind.WIN_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.LOSE_ROUND:
-//       return [...state, action.payload]
-//     case LeaderboardActionKind.DRAW_ROUND:
-//       return [...state, action.payload]
-//     default:
-//       throw new Error(`Unhandled  action type ${action.type}`)
-//   }
-// }
-
 export const Table: React.FC<IProps> = ({
   account,
   library,
@@ -86,21 +68,35 @@ export const Table: React.FC<IProps> = ({
   // socket,
   // getCard,
   currentDeck,
-  roundText,
-  isCanWithdraw,
-  score,
+  playerOneRound,
+  playerTwoRound,
+  // isCanWithdraw,
+  // score,
   getCard,
-  isSinglePlayer,
+  // isSinglePlayer,
   isGameEnded,
   // unlockBet,
   withdrawBet,
+  isLoading,
+  playerOne,
+  playerTwo,
+  setPlayerOne,
+  setPlayerTwo,
   // getWinner,
 }) => {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [playerTwo, setPlayerTwo] = useState("")
-  const [playerOne, setPlayerOne] = useState("")
-  const { socket, startDeck, cards, deckData, isGameActive, setIsGameActive } =
-    useSockets()
+  const {
+    socket,
+    startDeck,
+    cards,
+    deckData,
+    isSinglePlayer,
+    isGameActive,
+    setIsGameActive,
+    score,
+    setScore,
+    stand,
+    isCanWithdraw,
+  } = useSockets()
   // const handleClick = () => {
   //   dispatch({ type: LeaderboardActionKind.WIN_ROUND, payload: "Win" })
   // }
@@ -127,13 +123,18 @@ export const Table: React.FC<IProps> = ({
     } else {
       playerNumber = "1"
     }
+    const { tempDeck, cardImage, playerValue } = getCard!(
+      startDeck,
+      playerNumber
+    )
 
     const sendData = {
-      deck: deckData.deckCards,
+      deck: tempDeck,
+      card: cardImage,
+      sum: playerValue,
       player: playerNumber,
       room: room,
     }
-
     socket.emit("hit_me", sendData)
   }
 
@@ -147,31 +148,37 @@ export const Table: React.FC<IProps> = ({
     )
 
     const tx = await blackjackContract.withdrawSafe(
-      ethers.utils.parseEther("0.15")
+      ethers.utils.parseEther("0.5")
     )
   }
-  const checkVerifier = async () => {
-    const signer = library?.getSigner()
 
-    const blackjackContract = new Contract(
-      BLACKJACK_CONTRACT_ADDRESS,
-      BLACKJACK_CONTRACT_ABI,
-      signer
-    )
+  const standHand = async () => {
+    // toast.info("Calculating Winner")
 
-    const tx = await blackjackContract.verifierAddress()
-  }
-
-  const stand = async () => {
-    toast.info("Calculating Winner")
     let playerNumber: string
-    if (account == playerTwo) {
+    if (account === playerTwo) {
       playerNumber = "2"
+      if (!stand.playerTwo) {
+        await calculateProof(playerNumber)
+      } else {
+        toast.info("Wait for other player")
+      }
+      // setPlayerTwoRound((prevState: string[]) => [
+      //   ...prevState,
+      //   "Calculating...",
+      // ])
     } else {
       playerNumber = "1"
+      if (!stand.playerOne) {
+        await calculateProof(playerNumber)
+      } else {
+        toast.info("Wait for other player")
+      }
+      // setPlayerOneRound((prevState: string[]) => [
+      //   ...prevState,
+      //   "Calculating...",
+      // ])
     }
-
-    await calculateProof(playerNumber)
   }
 
   useEffect(() => {
@@ -180,11 +187,13 @@ export const Table: React.FC<IProps> = ({
     } else {
       setPlayerOne(account)
     }
-  }, [deckData, isSinglePlayer])
+  }, [cards, isSinglePlayer])
+
+  console.log("is single", isSinglePlayer)
 
   if (isSinglePlayer) {
     return (
-      <div className="   w-fit h-screen mt-2 ml-4 ">
+      <div className="   w-fit h-screen md:mt-20 lg:mt-2 mt-2 ml-4 ">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
         <div className="grid grid-cols-3  grid-rows-2 justify-center   items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
@@ -209,7 +218,8 @@ export const Table: React.FC<IProps> = ({
                       <div
                         key={card}
                         className={` 
-                        flex   `}
+                        flex   mt-0.5`}
+                        // key={card}
                       >
                         <Image
                           src={card}
@@ -221,7 +231,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div key={card} className="-ml-[8rem] md:-ml-[8rem]">
+                      <div key={card} className="-ml-[8rem] mt-1 md:-ml-[8rem]">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -255,26 +265,38 @@ export const Table: React.FC<IProps> = ({
             </div>
             <div
               className={` row-start-1 pt-10  w-fit ${
-                loading ? "opacity-60" : "opacity-20"
+                isLoading ? "opacity-60" : "opacity-20"
               } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
             >
               <Image
-                className={`${loading ? "animate-spin " : ""} `}
+                className={`${isLoading ? "animate-spin " : ""} `}
                 src={"/logo.svg"}
-                width={loading ? 90 : 56}
+                width={isLoading ? 90 : 56}
                 height={89}
                 layout={"fixed"}
               />
             </div>
-            <div className="relative -z-10 bottom-8 ml-6">
-              <Image
-                className="opacity-30"
-                src={"/text.svg"}
-                width={581}
-                height={131}
-                layout="fixed"
-              />
-            </div>
+            {!isLoading ? (
+              <div className="relative -z-10 bottom-8 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/text.svg"}
+                  width={581}
+                  height={131}
+                  layout="fixed"
+                />
+              </div>
+            ) : (
+              <div className="relative -z-10 -mb-5 bottom-7 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/final.svg"}
+                  width={664}
+                  height={155}
+                  layout="fixed"
+                />
+              </div>
+            )}
           </div>
           <div className="col-start-1 col-span-3 bottom-14 row-start-2 flex justify-evenly relative ">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center    md:mb-20">
@@ -384,19 +406,20 @@ export const Table: React.FC<IProps> = ({
               </h1>
             </div>
           </div>
-          <div className="col-start-1 row-start-1">
+          <div className="col-start-1 md:mb-20 lg:mb-0 row-start-1">
             <Scoreboard
               score={score}
               isSinglePlayer={isSinglePlayer}
               playerTwo={playerTwo}
-              roundText={roundText}
+              playerOneRound={playerOneRound}
+              // playerTwoRound={playerTwoRound}
               playerOne={playerOne}
             />{" "}
           </div>
           {!isGameEnded && (
-            <div className="col-start-3 row-start-1 flex ml-24 mt-6 flex-col items-center  ">
+            <div className="col-start-3 md:row-start-3 md:col-start-2 lg:col-start-3  lg:row-start-1  -ml-8 flex  lg:ml-24 -mt-28  lg:mt-6 flex-row lg:flex-col items-center  ">
               <button
-                onClick={stand}
+                onClick={standHand}
                 className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"
               >
                 <Image
@@ -406,10 +429,14 @@ export const Table: React.FC<IProps> = ({
                   layout="fixed"
                 />
               </button>
-              {/* <button onClick={withdrawSafe}>Start</button> */}
+              {account === "0xB402f112a2C8BF41739129F69c52bb97Eb95119a" && (
+                <button className=" p-4 text-white" onClick={withdrawSafe}>
+                  Start
+                </button>
+              )}
               <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
                 <Image
-                  onClick={() => getCard!(currentDeck!)}
+                  onClick={() => getCard!(currentDeck!, "1")}
                   src={"/hit.svg"}
                   width={120}
                   height={120}
@@ -418,7 +445,7 @@ export const Table: React.FC<IProps> = ({
               </button>
             </div>
           )}
-          {isCanWithdraw && (
+          {isCanWithdraw.playerOne! && (
             <div className="col-start-3 row-start-1 flex ml-24 mt-6 flex-col items-center">
               <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
                 <Image
@@ -438,9 +465,9 @@ export const Table: React.FC<IProps> = ({
     )
   } else {
     return (
-      <div className="   w-full h-screen mt-6 ">
+      <div className="    w-fit h-screen mt-2 ml-4">
         {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
-        <div className="grid grid-cols-3 grid-rows-2 justify-center  items-center h-full">
+        <div className="grid grid-cols-3  grid-rows-2 justify-center   items-center ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  md:gap-8 md:mt-6 md:mb-4">
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
@@ -456,16 +483,13 @@ export const Table: React.FC<IProps> = ({
                 layout="fixed"
               />
             </div> */}
-              {deckData.house.cards.length > 0 ? (
-                deckData.house.cards.map((card, index) => {
+              {cards.houseCards.length > 0 ? (
+                cards.houseCards.map((card, index) => {
                   if (index === 0) {
                     return (
-                      <div
-                        key={card}
-                        className="-ml-[8rem] mt-0.5 md:-ml-[12rem]"
-                      >
+                      <div key={card} className="mt-0.5">
                         <Image
-                          src={deckData.house.cards[0]!}
+                          src={card}
                           width={135}
                           height={140}
                           layout="fixed"
@@ -474,7 +498,7 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div key={card} className="z-10">
+                      <div key={card} className="-ml-[8rem] md:-ml-[8rem]">
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -486,7 +510,66 @@ export const Table: React.FC<IProps> = ({
                   }
                 })
               ) : (
-                <div className=" ">
+                <div className="flex justify-evenly relative left-12">
+                  <div className="">
+                    <Image
+                      src={"/cards/back.svg"}
+                      width={120}
+                      height={120}
+                      layout="fixed"
+                    />
+                  </div>
+                  <div className=" relative right-24">
+                    <Image
+                      src={"/cards/back.svg"}
+                      width={120}
+                      height={120}
+                      layout="fixed"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div
+              className={`hidden md:flex row-start-1 pt-10  w-fit ${
+                isLoading ? "opacity-60" : "opacity-20"
+              } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
+            >
+              <Image
+                className={`${isLoading ? "animate-spin " : ""} `}
+                src={"/logo.svg"}
+                width={isLoading ? 90 : 56}
+                height={89}
+                layout={"fixed"}
+              />
+            </div>
+            {!isLoading ? (
+              <div className="relative hidden lg:flex -z-10 bottom-8 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/text.svg"}
+                  width={581}
+                  height={131}
+                  layout="fixed"
+                />
+              </div>
+            ) : (
+              <div className="relative hidden lg:flex -z-10 -mb-5 bottom-7 ml-6">
+                <Image
+                  className="opacity-30"
+                  src={"/final.svg"}
+                  width={664}
+                  height={155}
+                  layout="fixed"
+                />
+              </div>
+            )}
+          </div>
+          <div className="col-start-1 col-span-3 bottom-32 row-start-2 flex justify-evenly relative right-16">
+            <div className="flex justify-evenly md:flex-row md:justify-center items-center  relative left-52 w-fit  md:mb-20">
+              <div className="w-28 h-28 absolute border-2 rounded-full"></div>
+              <div className="flex relative left-6">
+                <div className="relative left-14">
                   <Image
                     src={"/cards/back.svg"}
                     width={120}
@@ -494,100 +577,39 @@ export const Table: React.FC<IProps> = ({
                     layout="fixed"
                   />
                 </div>
-              )}
-            </div>
-            <div
-              className={` row-start-1 pt-10  w-fit ${
-                loading ? "opacity-60" : "opacity-20"
-              } mb-5 md:mb-0 flex  z-0 hover:opacity-30 transition duration-300 justify-center  `}
-            >
-              <Image
-                className={`${loading ? "animate-spin " : ""} `}
-                src={"/logo.svg"}
-                width={loading ? 90 : 56}
-                height={89}
-                layout={"fixed"}
-              />
-            </div>
-            <div className="relative -z-10 bottom-8 ml-6">
-              <Image
-                className="opacity-30"
-                src={"/text.svg"}
-                width={581}
-                height={131}
-                layout="fixed"
-              />
-            </div>
-          </div>
-          <div className="col-start-1 col-span-3 bottom-32 row-start-2 flex justify-evenly relative right-20">
-            <div className="flex justify-evenly relative left-24 md:flex-row md:justify-center items-center  md:gap-8 md:-mt-12 md:mb-4">
-              {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
-              House
-            </h1> */}
-              <div className="w-28 h-28 absolute border-2 rounded-full"></div>
-              {/* {startDeck &&
-              startDeck.map((card) => {
-                return (
-                  <div key={card} className="relative left-12 ml-0.5">
-                    <Image src={card} width={120} height={120} layout="fixed" />
-                  </div>
-                )
-              })} */}
-              {/* {startDeck && (
-              <div className="relative left-12 ml-0.5">
-                <Image
-                  src={`/cards/${startDeck[1]!}`}
-                  width={120}
-                  height={120}
-                  layout="fixed"
-                />
+                <div className={`  relative right-9 `}>
+                  <Image
+                    src={"/cards/back.svg"}
+                    width={120}
+                    height={120}
+                    layout="fixed"
+                  />
+                </div>
               </div>
-            )} */}
-              <div>
-                <Image
-                  src={"/cards/back.svg"}
-                  width={120}
-                  height={120}
-                  layout="fixed"
-                />
-              </div>
-              <div
-                className={` -ml-[8.5rem] md:-ml-[10.5rem] relative left-12 `}
-              >
-                <Image
-                  src={"/cards/back.svg"}
-                  width={120}
-                  height={120}
-                  layout="fixed"
-                />
-              </div>
-              <h1 className="relative top-24 right-20 ml-2 text-white font-poppins text-xl">
+              <h1 className="relative top-24 right-32 ml-2 text-white font-poppins text-xl">
                 Vitalik
               </h1>
-              {/* <div className="">
-              <h1 className="text-xl text-white font-poppins text-center">
-                Player
-              </h1>
-            </div> */}
             </div>
 
             <div
               className={`flex justify-evenly max-w-fit relative ${
-                account ? "left-16" : "left-14"
+                playerTwo === "" ? "left-20" : "left-12"
               }  md:flex-row md:justify-center items-center  md:gap-8 md:mt-12 md:mb-4`}
             >
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
               House
             </h1> */}
-              <div className="w-28 h-28 absolute border-2 rounded-full"></div>
+              <div className="w-28 h-28 absolute  border-2 rounded-full"></div>
               {account && account === playerTwo ? (
-                deckData.player2.cards.length > 0 ? (
-                  deckData.player2.cards.map((card, index) => {
+                cards.playerTwoCards.length > 0 ? (
+                  cards.playerTwoCards.map((card, index) => {
                     if (index === 0) {
                       return (
                         <div
                           key={card}
-                          className=" relative left-[38px] mt-0.5 "
+                          className={` ${
+                            index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                          }  flex gap-6  relative left-20`}
                         >
                           <Image
                             src={card}
@@ -602,10 +624,8 @@ export const Table: React.FC<IProps> = ({
                         return (
                           <div
                             key={card}
-                            className={` 
-  -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
+                            className={` "-ml-[8rem]  md:-ml-[8rem]" 
+                              flex gap-6  relative left-20`}
                           >
                             <Image
                               src={"/cards/back.svg"}
@@ -620,8 +640,9 @@ export const Table: React.FC<IProps> = ({
                         return (
                           <div
                             key={card}
-                            className={` 
-     mt-[2px]  relative left-20 `}
+                            className={` ${
+                              index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                            }  flex gap-6  relative left-20`}
                           >
                             <Image
                               // src={"/cards/back.svg"}
@@ -636,12 +657,8 @@ export const Table: React.FC<IProps> = ({
                     }
                   })
                 ) : (
-                  <div>
-                    <div
-                      className={`relative ${
-                        account ? "left-[77px]" : "left-[52px]"
-                      } `}
-                    >
+                  <div className="flex justify-evenly relative left-[130px]">
+                    <div className="">
                       <Image
                         src={"/cards/back.svg"}
                         width={120}
@@ -649,12 +666,7 @@ export const Table: React.FC<IProps> = ({
                         layout="fixed"
                       />
                     </div>
-                    <div
-                      className={` 
-  -ml-[6rem] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
-                    >
+                    <div className=" relative right-24">
                       <Image
                         src={"/cards/back.svg"}
                         width={120}
@@ -664,11 +676,16 @@ export const Table: React.FC<IProps> = ({
                     </div>
                   </div>
                 )
-              ) : deckData.player1.cards.length > 0 ? (
-                deckData.player1.cards.map((card, index) => {
+              ) : cards.playerOneCards.length > 0 ? (
+                cards.playerOneCards.map((card, index) => {
                   if (index === 0) {
                     return (
-                      <div key={card} className=" relative left-[38px] mt-0.5 ">
+                      <div
+                        key={card}
+                        className={` ${
+                          index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                        }  flex gap-6  relative left-20`}
+                      >
                         <Image
                           src={card}
                           width={135}
@@ -682,8 +699,9 @@ export const Table: React.FC<IProps> = ({
                       return (
                         <div
                           key={card}
-                          className={` 
-   mt-[2px] relative ${account ? "left-[77px]" : "left-[52px]"} `}
+                          className={` ${
+                            index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                          }  flex gap-6  relative left-20`}
                         >
                           <Image
                             // src={"/cards/back.svg"}
@@ -716,12 +734,35 @@ export const Table: React.FC<IProps> = ({
                   }
                 })
               ) : (
-                <div>
-                  <div
-                    className={`relative ${
-                      account ? "left-[77px]" : "left-[52px]"
-                    } `}
-                  >
+                //               <div>
+                //                 <div
+                //                   className={`relative ${
+                //                     account ? "left-[77px]" : "left-[52px]"
+                //                   } `}
+                //                 >
+                //                   <Image
+                //                     src={"/cards/back.svg"}
+                //                     width={120}
+                //                     height={120}
+                //                     layout="fixed"
+                //                   />
+                //                 </div>
+                //                 <div
+                //                   className={`
+                // -ml-[6rem] md:-ml-[10.5rem] relative ${
+                //   account ? "left-[77px]" : "left-[52px]"
+                // } `}
+                //                 >
+                //                   <Image
+                //                     src={"/cards/back.svg"}
+                //                     width={120}
+                //                     height={120}
+                //                     layout="fixed"
+                //                   />
+                //                 </div>
+                //               </div>
+                <div className="flex justify-evenly relative left-[130px]">
+                  <div className="">
                     <Image
                       src={"/cards/back.svg"}
                       width={120}
@@ -729,12 +770,7 @@ export const Table: React.FC<IProps> = ({
                       layout="fixed"
                     />
                   </div>
-                  <div
-                    className={` 
-  -ml-[6rem] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
-                  >
+                  <div className=" relative right-24">
                     <Image
                       src={"/cards/back.svg"}
                       width={120}
@@ -744,12 +780,12 @@ export const Table: React.FC<IProps> = ({
                   </div>
                 </div>
               )}
-              <h1 className="relative top-24 right-16  text-white font-poppins text-xl">
+              <h1 className="relative top-24 right-28  text-white font-poppins text-xl">
                 {account ? truncateEthAddress(account) : "Player 1"}
               </h1>
             </div>
 
-            <div className="flex justify-evenly md:flex-row relative bottom-2 md:justify-center items-center  md:gap-8 -mt-8 md:mb-4">
+            <div className="flex justify-evenly md:flex-row relative right-16 bottom-2 md:justify-center items-center  md:gap-8 -mt-8 md:mb-4">
               {/* <h1 className="text-white text-3xl pb-4 text-center text-poppins">
               House
             </h1> */}
@@ -758,13 +794,15 @@ export const Table: React.FC<IProps> = ({
 
             } */}
               {account && account === playerTwo ? (
-                deckData.player1.cards.length > 0 ? (
-                  deckData.player1.cards.map((card, index) => {
+                cards.playerOneCards.length > 0 ? (
+                  cards.playerOneCards.map((card, index) => {
                     if (index === 0) {
                       return (
                         <div
                           key={card}
-                          className=" relative left-[38px] mt-0.5 "
+                          className={` ${
+                            index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                          }  flex gap-6  relative left-20`}
                         >
                           <Image
                             key={card}
@@ -779,10 +817,9 @@ export const Table: React.FC<IProps> = ({
                       return (
                         <div
                           key={card}
-                          className={` 
-  -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
+                          className={` ${
+                            index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                          }  flex gap-6  relative left-20`}
                         >
                           <Image
                             src={"/cards/back.svg"}
@@ -796,12 +833,8 @@ export const Table: React.FC<IProps> = ({
                     }
                   })
                 ) : (
-                  <div>
-                    <div
-                      className={`relative ${
-                        account ? "left-[77px]" : "left-[52px]"
-                      } `}
-                    >
+                  <div className="flex relative left-[68px]">
+                    <div className="relative left-16">
                       <Image
                         src={"/cards/back.svg"}
                         width={120}
@@ -809,12 +842,7 @@ export const Table: React.FC<IProps> = ({
                         layout="fixed"
                       />
                     </div>
-                    <div
-                      className={` 
-  -ml-[6rem] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
-                    >
+                    <div className={`  relative right-8 `}>
                       <Image
                         src={"/cards/back.svg"}
                         width={120}
@@ -824,8 +852,8 @@ export const Table: React.FC<IProps> = ({
                     </div>
                   </div>
                 )
-              ) : deckData.player2.cards.length > 0 ? (
-                deckData.player2.cards.map((card, index) => {
+              ) : cards.playerTwoCards.length > 0 ? (
+                cards.playerTwoCards.map((card, index) => {
                   if (index === 0) {
                     return (
                       <div key={card} className=" relative left-[38px] mt-0.5 ">
@@ -843,9 +871,7 @@ export const Table: React.FC<IProps> = ({
                       <div
                         key={card}
                         className={` 
-  -ml-[6rem] mt-[2px] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
+  -ml-[6rem]  md:-ml-[10.5rem] relative left-20`}
                       >
                         <Image
                           src={"/cards/back.svg"}
@@ -859,12 +885,8 @@ export const Table: React.FC<IProps> = ({
                   }
                 })
               ) : (
-                <div>
-                  <div
-                    className={`relative ${
-                      account ? "left-[77px]" : "left-[52px]"
-                    } `}
-                  >
+                <div className="flex relative left-[68px]">
+                  <div className="relative left-16">
                     <Image
                       src={"/cards/back.svg"}
                       width={120}
@@ -872,12 +894,7 @@ export const Table: React.FC<IProps> = ({
                       layout="fixed"
                     />
                   </div>
-                  <div
-                    className={` 
-  -ml-[6rem] md:-ml-[10.5rem] relative ${
-    account ? "left-[77px]" : "left-[52px]"
-  } `}
-                  >
+                  <div className={`  relative right-8 `}>
                     <Image
                       src={"/cards/back.svg"}
                       width={120}
@@ -921,7 +938,7 @@ export const Table: React.FC<IProps> = ({
                 layout="fixed"
               />
             </div> */}
-              <h1 className="relative top-24 right-16  text-white font-poppins text-xl">
+              <h1 className="relative top-24 right-32  text-white font-poppins text-xl">
                 {account === playerTwo
                   ? truncateEthAddress(playerOne)
                   : truncateEthAddress(playerTwo)}
@@ -933,13 +950,14 @@ export const Table: React.FC<IProps> = ({
               score={score}
               isSinglePlayer={isSinglePlayer}
               playerTwo={playerTwo}
-              roundText={roundText} // for each player
+              playerOneRound={playerOneRound}
+              playerTwoRound={playerTwoRound}
               playerOne={playerOne}
             />{" "}
           </div>
           <div className="col-start-3  row-start-1 flex ml-12 mt-6 flex-col items-center  ">
             <button
-              onClick={stand}
+              onClick={standHand}
               className="p-4 mb-4  hover:scale-110 transition duration-300 ease-in-out"
             >
               <Image
@@ -949,7 +967,11 @@ export const Table: React.FC<IProps> = ({
                 layout="fixed"
               />
             </button>
-            <button onClick={checkVerifier}>Start</button>
+            {account === "0xB402f112a2C8BF41739129F69c52bb97Eb95119a" && (
+              <button className=" p-4 text-white" onClick={withdrawSafe}>
+                Start
+              </button>
+            )}
             <button className="p-4  mb-4 hover:scale-110 transition duration-300 ease-in-out">
               <Image
                 onClick={hitMe}
