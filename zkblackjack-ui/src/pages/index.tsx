@@ -277,7 +277,7 @@ const Home: NextPage<IProps> = ({
       <main className="bg-[#144b1e]  pb-1 text-white">
         <nav className="px-8 md:px-2 fixed w-full -z-10 top-0 left-0 py-3.5    "></nav>
         {isLoading ? (
-          <div className="flex justify-center flex-row  relative top-64 left-0 z-20">
+          <div className="flex  justify-center  flex-row  relative top-64 left-0 z-20">
             <div className=" absolute top-12 left-1/2">
               <svg
                 width="36"
@@ -306,11 +306,11 @@ const Home: NextPage<IProps> = ({
             </div> */}
           </div>
         ) : (
-          <div className="grid items-center justify-center grid-cols-3 mt-20 lg:mt-8">
-            <div className="flex items-center justify-center col-start-1 mx-auto w-fit">
+          <div className="grid items-center justify-center  lg:grid-rows-none  md:grid-cols-3 mt-20 lg:mt-8">
+            <div className="flex items-center justify-center row-start-2 lg:row-start-1 md:mt-4 md:col-start-2 lg:col-start-3 mx-auto w-fit">
               <button
                 onClick={startSinglePlayer}
-                className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
+                className="mx-2 mt-4 md:mt-0 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
                 <Image
                   src={"/single.svg"}
@@ -320,13 +320,13 @@ const Home: NextPage<IProps> = ({
                 />
               </button>
             </div>
-            <div className="flex items-center justify-center col-start-2">
+            <div className="flex items-center justify-center row-start-1 col-start-1 md:col-start-2">
               <Rules />
             </div>
-            <div className="flex flex-col items-center justify-center gap-10 mx-auto w-fit">
+            <div className="flex flex-col md:flex-row lg:flex-col items-center  md:col-start-2 md:row-start-3 lg:col-start-1 lg:row-start-1 justify-center gap-10 mx-auto w-fit">
               <button
                 onClick={createRoom}
-                className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
+                className="mx-2 md:mx-auto lg:mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
                 <Image
                   src={"/create.svg"}
@@ -340,7 +340,7 @@ const Home: NextPage<IProps> = ({
                   setIsJoin(true)
                   setIsModalOpen(true)
                 }}
-                className="mx-2 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
+                className="mx-2 md:mx-auto lg:mx-2 -mt-8 md:mt-0 transition duration-300 ease-in-out lg:px-8 hover:scale-110"
               >
                 <Image
                   src={"/join.svg"}

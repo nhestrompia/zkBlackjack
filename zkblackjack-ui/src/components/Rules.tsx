@@ -3,7 +3,7 @@ import React from "react"
 
 const Rules: React.FC = () => {
   return (
-    <div className="max-w-sm bg-gradient-to-b from-gray-900 overflow-hidden to-gray-600  transform transition-all  duration-400 bg-white  rounded-2xl shadow-2xl ">
+    <div className="w-4/5 md:w-fit lg:max-w-sm bg-gradient-to-b from-gray-900 overflow-hidden to-gray-600  transform transition-all  duration-400 bg-white  rounded-2xl shadow-2xl ">
       <div className="h-full  w-full">
         <Image
           src={"/playerss.svg"}
