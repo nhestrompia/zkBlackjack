@@ -152,6 +152,8 @@ export const Table: React.FC<IProps> = ({
     )
   }
 
+  // console.log("current deck", startDeck)
+
   const standHand = async () => {
     // toast.info("Calculating Winner")
 

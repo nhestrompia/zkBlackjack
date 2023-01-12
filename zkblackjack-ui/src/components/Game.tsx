@@ -105,7 +105,12 @@ export const Game: React.FC<IProps> = ({
         playerOne: false,
         playerTwo: false,
       })
-
+      setPlayerOneRound([])
+      setPlayerTwoRound([])
+      setScore({
+        playerOne: 0,
+        playerTwo: 0,
+      })
       if (isSinglePlayer) {
         const firstDeck = constructDeck()
 
@@ -919,10 +924,22 @@ export const Game: React.FC<IProps> = ({
               playerOne: prevState.playerOne - 1,
             }))
           } else {
-            setPlayerOneRound((prev: string[]) =>
-              prev.filter((text) => text !== "Calculating...")
-            )
-            setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
+            if (parseInt(playerSum) === 0) {
+              setPlayerOneRound((prev: string[]) =>
+                prev.filter((text) => text !== "Calculating...")
+              )
+              setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
+
+              setScore((prevState: Score) => ({
+                ...prevState,
+                playerOne: prevState.playerOne - 1,
+              }))
+            } else {
+              setPlayerOneRound((prev: string[]) =>
+                prev.filter((text) => text !== "Calculating...")
+              )
+              setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
+            }
           }
         } else {
           // const newRound = playerOneRound!.map((text, index) => {
@@ -1047,14 +1064,35 @@ export const Game: React.FC<IProps> = ({
               }))
               socket.emit("stand", eventData)
             } else {
-              setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
-              const eventData = {
-                room: room,
-                player: player,
-                round: "Draw",
-                score: score.playerOne,
+              if (parseInt(playerSum) === 0) {
+                setPlayerOneRound((prevState: string[]) => [
+                  ...prevState,
+                  "Lose",
+                ])
+                const eventData = {
+                  room: room,
+                  player: player,
+                  round: "Lose",
+                  score: score.playerOne - 1,
+                }
+                setScore((prevState: Score) => ({
+                  ...prevState,
+                  playerOne: prevState.playerOne - 1,
+                }))
+                socket.emit("stand", eventData)
+              } else {
+                setPlayerOneRound((prevState: string[]) => [
+                  ...prevState,
+                  "Draw",
+                ])
+                const eventData = {
+                  room: room,
+                  player: player,
+                  round: "Draw",
+                  score: score.playerOne,
+                }
+                socket.emit("stand", eventData)
               }
-              socket.emit("stand", eventData)
             }
           } else {
             setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
@@ -1145,14 +1183,35 @@ export const Game: React.FC<IProps> = ({
               }))
               socket.emit("stand", eventData)
             } else {
-              setPlayerTwoRound((prevState: string[]) => [...prevState, "Draw"])
-              const eventData = {
-                room: room,
-                player: player,
-                round: "Draw",
-                score: score.playerTwo,
+              if (parseInt(playerSum) === 0) {
+                setPlayerTwoRound((prevState: string[]) => [
+                  ...prevState,
+                  "Lose",
+                ])
+                const eventData = {
+                  room: room,
+                  player: player,
+                  round: "Lose",
+                  score: score.playerTwo - 1,
+                }
+                setScore((prevState: Score) => ({
+                  ...prevState,
+                  playerTwo: prevState.playerTwo - 1,
+                }))
+                socket.emit("stand", eventData)
+              } else {
+                setPlayerTwoRound((prevState: string[]) => [
+                  ...prevState,
+                  "Draw",
+                ])
+                const eventData = {
+                  room: room,
+                  player: player,
+                  round: "Draw",
+                  score: score.playerTwo,
+                }
+                socket.emit("stand", eventData)
               }
-              socket.emit("stand", eventData)
             }
           } else {
             setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
