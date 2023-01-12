@@ -193,8 +193,7 @@ export const Table: React.FC<IProps> = ({
 
   if (isSinglePlayer) {
     return (
-      <div className="   w-fit h-screen md:mt-20 lg:mt-2 mt-2 ml-4 ">
-        {/* <div className="h-[1400px] w-[2000px]   absolute -right-2 bg-transparent border-2 rounded-[50%] "></div> */}
+      <div className="   w-fit h-screen md:mt-20 lg:mt-2 mt-16 ml-8 md:ml-4 ">
         <div className="grid grid-cols-3  grid-rows-2 justify-center   items-center   ">
           <div className="col-start-2 row-start-1 flex flex-col items-center  relative right-8">
             <div className="flex justify-evenly md:flex-row md:justify-center items-center  md:gap-8 md:mt-6 md:mb-4">
@@ -230,7 +229,10 @@ export const Table: React.FC<IProps> = ({
                     )
                   } else {
                     return (
-                      <div key={card} className="-ml-[8rem] mt-1 md:-ml-[8rem]">
+                      <div
+                        key={card}
+                        className="-ml-24 mt-2 md:mt-1 md:-ml-[8rem]"
+                      >
                         <Image
                           src={"/cards/back.svg"}
                           width={120}
@@ -276,7 +278,7 @@ export const Table: React.FC<IProps> = ({
               />
             </div>
             {!isLoading ? (
-              <div className="relative -z-10 bottom-8 ml-6">
+              <div className="hidden md:flex md:relative -z-10 bottom-8 ml-6">
                 <Image
                   className="opacity-30"
                   src={"/text.svg"}
@@ -286,7 +288,7 @@ export const Table: React.FC<IProps> = ({
                 />
               </div>
             ) : (
-              <div className="relative -z-10 -mb-5 bottom-7 ml-6">
+              <div className="hidden md:flex md:relative -z-10 -mb-5 bottom-7 ml-6">
                 <Image
                   className="opacity-30"
                   src={"/final.svg"}
@@ -298,7 +300,7 @@ export const Table: React.FC<IProps> = ({
             )}
           </div>
           <div className="col-start-1 col-span-3 bottom-14 row-start-2 flex justify-evenly relative ">
-            <div className="flex justify-evenly md:flex-row md:justify-center items-center    md:mb-20">
+            <div className="hidden md:flex justify-evenly md:flex-row md:justify-center items-center    md:mb-20">
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               <div className="flex relative left-5">
                 <div className="relative left-14">
@@ -334,7 +336,7 @@ export const Table: React.FC<IProps> = ({
                     <div
                       key={card}
                       className={` ${
-                        index !== 0 ? "-ml-[8rem]  md:-ml-[8rem]" : ""
+                        index !== 0 ? "-ml-20  md:-ml-[8rem]" : ""
                       }  flex gap-6  relative left-20`}
                     >
                       <Image
@@ -380,7 +382,7 @@ export const Table: React.FC<IProps> = ({
               </h1>
             </div>
 
-            <div className="flex justify-evenly relative right-8 md:flex-row md:justify-center items-center    md:mb-20">
+            <div className="hidden md:flex justify-evenly relative right-8 md:flex-row md:justify-center items-center    md:mb-20">
               <div className="w-28 h-28 absolute border-2 rounded-full"></div>
               <div className="flex relative left-2">
                 <div className="relative left-14">
@@ -416,7 +418,7 @@ export const Table: React.FC<IProps> = ({
             />{" "}
           </div>
           {!isGameEnded && (
-            <div className="col-start-3 md:row-start-3 md:col-start-2 lg:col-start-3  lg:row-start-1  -ml-8 flex  lg:ml-24 -mt-28  lg:mt-6 flex-row lg:flex-col items-center  ">
+            <div className=" col-start-2  justify-center md:row-start-3 md:col-start-2 lg:col-start-3  lg:row-start-1  -ml-8 flex  mt-6 lg:ml-24 md:-mt-28  lg:mt-6 flex-row lg:flex-col items-center  ">
               <button
                 onClick={standHand}
                 className="p-4 mb-4 hover:scale-110 transition duration-300 ease-in-out"
