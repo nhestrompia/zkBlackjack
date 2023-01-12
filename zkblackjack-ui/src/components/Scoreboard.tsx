@@ -21,7 +21,7 @@ export const Scoreboard: React.FC<IProps> = ({
 }) => {
   return (
     <div
-      className={`grid  text-white font-poppins grid-cols-2 grid-rows-4 text-center mt-4 ${
+      className={`hidden md:grid -mt-32 text-white font-poppins grid-cols-2 grid-rows-4 text-center lg:mt-4 ${
         isSinglePlayer ? "ml-16" : "ml-10"
       } ml-4 justify-center w-64 h-64 bg-transparent rounded-xl`}
     >

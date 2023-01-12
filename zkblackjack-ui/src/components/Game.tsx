@@ -108,7 +108,6 @@ export const Game: React.FC<IProps> = ({
 
       if (isSinglePlayer) {
         const firstDeck = constructDeck()
-        console.log("here?")
 
         dealCards(firstDeck)
       }
@@ -218,7 +217,7 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     if (isGameEnded && currentDeck.length <= 4) {
-      console.log("getting triggered")
+      ;("getting triggered")
       if (isSinglePlayer) {
         unlockBet(account, "1")
       } else {
@@ -398,7 +397,6 @@ export const Game: React.FC<IProps> = ({
         const nonce = await library.getTransactionCount(
           "0xB402f112a2C8BF41739129F69c52bb97Eb95119a"
         )
-        console.log("nonce", nonce)
         if (score.playerTwo > 0) {
           toast.info(
             "You have won the game and extra 0.01 ETH! Wait for withdraw button to come",
@@ -479,6 +477,7 @@ export const Game: React.FC<IProps> = ({
               progress: 0,
             }
           )
+          setIsLoading(true)
           const endGame: TransactionResponse = await blackjackContract.endGame(
             account,
             gameId,
@@ -553,7 +552,7 @@ export const Game: React.FC<IProps> = ({
   }
 
   const constructDeck = () => {
-    console.log("here")
+    ;("here")
     const cardValues: string[] = [
       "2",
       "3",
@@ -721,17 +720,16 @@ export const Game: React.FC<IProps> = ({
       }
     }
   }
-  console.log("current deck", currentDeck)
+
   useEffect(() => {
     checkAce()
   }, [sums])
 
   const dealCards = (deckData: string[]) => {
     const usedDeck: string[] = deckData
-    console.log("got dealcards")
     if (usedDeck.length >= 4) {
       // setRoundText([])
-      console.log("in if statement")
+      ;("in if statement")
       setAces({
         playerOneAces: 0,
         playerTwoAces: 0,
@@ -820,10 +818,7 @@ export const Game: React.FC<IProps> = ({
         playerOneSum: playerOneValue,
       })
       setCurrentDeck(usedDeck)
-      console.log("dealt dealcards")
     } else {
-      console.log("got couldnt dealcards")
-
       toast.error("No more cards left. This is the final round!", {
         position: "top-center",
         autoClose: 3000,
@@ -875,16 +870,13 @@ export const Game: React.FC<IProps> = ({
       return true
     }
   }
-  //TODO singleplayer 21> draw errro
   const getWinner = (
     player: string,
     result: string,
     draw: string,
     playerSum: string
   ) => {
-    console.log("player", player)
     if (isSinglePlayer) {
-      console.log("playeroneRound", playerOneRound)
       if (result === "1") {
         // const newRound = playerOneRound!.map((text, index) => {
         //   if (index === calculateIndex - 1) {
@@ -918,7 +910,7 @@ export const Game: React.FC<IProps> = ({
             //     return text
             //   }
             // })
-            // console.log("new round", newRound)
+            //  ("new round", newRound)
             // setRoundText(newRound)
             setPlayerOneRound((prev: string[]) =>
               prev.filter((text) => text !== "Calculating...")
@@ -945,10 +937,10 @@ export const Game: React.FC<IProps> = ({
           //     return text
           //   }
           // })
-          // console.log("new round", newRound)
+          //  ("new round", newRound)
           // setRoundText(newRound)
           // const copyArr = [...playerOneRound]
-          // console.log("copyaarrr", copyArr)
+          //  ("copyaarrr", copyArr)
 
           // copyArr.pop()
           // copyArr.push("Lose")
@@ -974,7 +966,7 @@ export const Game: React.FC<IProps> = ({
           //     return text
           //   }
           // })
-          // console.log("new round", newRound)
+          //  ("new round", newRound)
           // setRoundText(newRound)
           setPlayerOneRound((prev: string[]) =>
             prev.filter((text) => text !== "Calculating...")
@@ -995,7 +987,7 @@ export const Game: React.FC<IProps> = ({
           //     return text
           //   }
           // })
-          // console.log("new round", newRound)
+          //  ("new round", newRound)
           // setRoundText(newRound)
           setPlayerOneRound((prev: string[]) =>
             prev.filter((text: string) => text !== "Calculating...")
@@ -1014,7 +1006,7 @@ export const Game: React.FC<IProps> = ({
 
         // unlockBet(account, "1")
       } else {
-        console.log("here?")
+        ;("here?")
         dealCards(currentDeck)
       }
     } else {
@@ -1028,16 +1020,17 @@ export const Game: React.FC<IProps> = ({
             prev.filter((text) => text !== "Calculating...")
           )
           setPlayerOneRound((prevState: string[]) => [...prevState, "Win"])
-          setScore((prevState: Score) => ({
-            ...prevState,
-            playerOne: prevState.playerOne + 1,
-          }))
           const eventData = {
             room: room,
             player: player,
             round: "Win",
-            score: score,
+            score: score.playerOne + 1,
           }
+          setScore((prevState: Score) => ({
+            ...prevState,
+            playerOne: prevState.playerOne + 1,
+          }))
+
           socket.emit("stand", eventData)
         } else if (result === "0") {
           setPlayerOneRound((prev: string[]) =>
@@ -1046,16 +1039,16 @@ export const Game: React.FC<IProps> = ({
           if (draw === "2") {
             if (parseInt(playerSum) > 21) {
               setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
-              setScore((prevState: Score) => ({
-                ...prevState,
-                playerOne: prevState.playerOne - 1,
-              }))
               const eventData = {
                 room: room,
                 player: player,
                 round: "Lose",
-                score: score,
+                score: score.playerOne - 1,
               }
+              setScore((prevState: Score) => ({
+                ...prevState,
+                playerOne: prevState.playerOne - 1,
+              }))
               socket.emit("stand", eventData)
             } else {
               setPlayerOneRound((prevState: string[]) => [...prevState, "Draw"])
@@ -1063,22 +1056,22 @@ export const Game: React.FC<IProps> = ({
                 room: room,
                 player: player,
                 round: "Draw",
-                score: score,
+                score: score.playerOne,
               }
               socket.emit("stand", eventData)
             }
           } else {
             setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
-            setScore((prevState: Score) => ({
-              ...prevState,
-              playerOne: prevState.playerOne - 1,
-            }))
             const eventData = {
               room: room,
               player: player,
               round: "Lose",
-              score: score,
+              score: score.playerOne - 1,
             }
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerOne: prevState.playerOne - 1,
+            }))
             socket.emit("stand", eventData)
           }
         } else if (result === "2") {
@@ -1087,16 +1080,16 @@ export const Game: React.FC<IProps> = ({
               prev.filter((text) => text !== "Calculating...")
             )
             setPlayerOneRound((prevState: string[]) => [...prevState, "Lose"])
-            setScore((prevState: Score) => ({
-              ...prevState,
-              playerOne: prevState.playerOne - 1,
-            }))
             const eventData = {
               room: room,
               player: player,
               round: "Lose",
-              score: score,
+              score: score.playerOne - 1,
             }
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerOne: prevState.playerOne - 1,
+            }))
             socket.emit("stand", eventData)
             // setRoundText({
             //   ...roundText,
@@ -1112,7 +1105,7 @@ export const Game: React.FC<IProps> = ({
             room: room,
             player: player,
             round: "Draw",
-            score: score,
+            score: score.playerOne,
           }
           socket.emit("stand", eventData)
         }
@@ -1126,16 +1119,16 @@ export const Game: React.FC<IProps> = ({
             prev.filter((text) => text !== "Calculating...")
           )
           setPlayerTwoRound((prevState: string[]) => [...prevState, "Win"])
-          setScore((prevState: Score) => ({
-            ...prevState,
-            playerTwo: prevState.playerTwo + 1,
-          }))
           const eventData = {
             room: room,
             player: player,
             round: "Win",
-            score: score,
+            score: score.playerTwo + 1,
           }
+          setScore((prevState: Score) => ({
+            ...prevState,
+            playerTwo: prevState.playerTwo + 1,
+          }))
           socket.emit("stand", eventData)
         } else if (result === "0") {
           setPlayerTwoRound((prev: string[]) =>
@@ -1144,16 +1137,16 @@ export const Game: React.FC<IProps> = ({
           if (draw === "2") {
             if (parseInt(playerSum) > 21) {
               setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
-              setScore((prevState: Score) => ({
-                ...prevState,
-                playerTwo: prevState.playerTwo - 1,
-              }))
               const eventData = {
                 room: room,
                 player: player,
                 round: "Lose",
-                score: score,
+                score: score.playerTwo - 1,
               }
+              setScore((prevState: Score) => ({
+                ...prevState,
+                playerTwo: prevState.playerTwo - 1,
+              }))
               socket.emit("stand", eventData)
             } else {
               setPlayerTwoRound((prevState: string[]) => [...prevState, "Draw"])
@@ -1161,22 +1154,22 @@ export const Game: React.FC<IProps> = ({
                 room: room,
                 player: player,
                 round: "Draw",
-                score: score,
+                score: score.playerTwo,
               }
               socket.emit("stand", eventData)
             }
           } else {
             setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
-            setScore((prevState: Score) => ({
-              ...prevState,
-              playerTwo: prevState.playerTwo - 1,
-            }))
             const eventData = {
               room: room,
               player: player,
               round: "Lose",
-              score: score,
+              score: score.playerTwo - 1,
             }
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerTwo: prevState.playerTwo - 1,
+            }))
             socket.emit("stand", eventData)
           }
         } else if (result === "2") {
@@ -1185,16 +1178,16 @@ export const Game: React.FC<IProps> = ({
               prev.filter((text) => text !== "Calculating...")
             )
             setPlayerTwoRound((prevState: string[]) => [...prevState, "Lose"])
-            setScore((prevState: Score) => ({
-              ...prevState,
-              playerTwo: prevState.playerTwo - 1,
-            }))
             const eventData = {
               room: room,
               player: player,
               round: "Lose",
-              score: score,
+              score: score.playerTwo - 1,
             }
+            setScore((prevState: Score) => ({
+              ...prevState,
+              playerTwo: prevState.playerTwo - 1,
+            }))
             socket.emit("stand", eventData)
           } else {
             setPlayerTwoRound((prev: string[]) =>

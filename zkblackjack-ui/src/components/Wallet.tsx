@@ -141,14 +141,14 @@ export const Wallet: React.FC<IProps> = ({
     <div>
       {account ? (
         <button
-          className="focus:outline-none font-poppins z-30 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3  bg-[#ea5959] transition duration-300 ease-in-out hover:bg-[#de4646] focus:ring-blue-800"
+          className="focus:outline-none font-poppins z-30 text-white font-medium rounded-lg text-sm px-3 md:px-5 py-2.5 text-center mr-3  bg-[#ea5959] transition duration-300 ease-in-out hover:bg-[#de4646] focus:ring-blue-800"
           onClick={disconnect}
         >
           {truncateEthAddress(account)}
         </button>
       ) : (
         <button
-          className="focus:outline-none font-poppins z-30 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3  bg-[#ea5959] transition duration-300 ease-in-out hover:bg-[#de4646] focus:ring-blue-800"
+          className="focus:outline-none font-poppins z-30 text-white font-medium rounded-lg text-sm px-3 md:px-5 py-2.5 text-center mr-3  bg-[#ea5959] transition duration-300 ease-in-out hover:bg-[#de4646] focus:ring-blue-800"
           onClick={connectWallet}
         >
           Connect Wallet
