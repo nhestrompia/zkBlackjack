@@ -12,52 +12,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   const [account, setAccount] = useState<string>("")
   const [provider, setProvider] = useState()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  // const [socket, setSocket] = useState<Socket>()
-  // const [isSinglePlayer, setIsSinglePlayer] = useState<boolean>(false);
-  // const [isGameActive, setIsGameActive] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   const socketInstance = io("http://localhost:3001")
-  //   setSocket(socketInstance)
-
-  //   return () => {
-  //     return(
-  //       socketInstance.off("disconnect",() => {
-  //         console.log("client disconnected")
-  //       })
-  //     )
-  //   }
-  // }, [])
-
-  // useEffect(() => {
-  //   if (!socket) {
-  //     setSocket(io("http://localhost:3001"))
-  //   }
-
-  //   return () => {
-  //     socket?.disconnect()
-  //   }
-  // }, [])
-  // console.log("isSingle player aasdpp", isSinglePlayer);
-
-  // useEffect(() => {
-  //   if (!socket) return
-
-  //   socket!.on("connect", () => {
-  //     console.log("socket connected")
-  //   })
-
-  //   const deckListener = (data: string[]) => {
-  //     console.log("app asdadasdadgfdöbvbvd", data)
-  //   }
-
-  //   socket!.on("new_player", deckListener)
-
-  //   return () => {
-  //     socket.off("connect")
-  //     socket.off("new_player")
-  //   }
-  // }, [socket])
 
   return (
     <>

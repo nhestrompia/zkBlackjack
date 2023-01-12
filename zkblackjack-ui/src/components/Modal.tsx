@@ -51,7 +51,7 @@ export const Modal: React.FC<IProps> = ({
         >
           <div id="modal" className="">
             <div className="relative w-full max-w-md p-4 h-1/2 md:h-auto">
-              <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <div className="relative bg-[#F8FBFE] rounded-lg shadow ">
                 <div className="flex items-center justify-center p-5 text-center rounded-t ">
                   {/* <h3 className="text-xl font-medium text-white">
                     Join Game
@@ -60,7 +60,7 @@ export const Modal: React.FC<IProps> = ({
                   <button
                     onClick={() => setIsModalOpen(false)}
                     type="button"
-                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    className="text-gray-400 bg-transparent font-poppins   hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     data-modal-toggle="small-modal"
                   >
                     <svg
@@ -76,7 +76,7 @@ export const Modal: React.FC<IProps> = ({
                         clipRule="evenodd"
                       ></path>
                     </svg>
-                    <span className="sr-only">Close modal</span>
+                    <span className="sr-only font-poppins">Close modal</span>
                   </button>
                 </div>
 
@@ -86,7 +86,7 @@ export const Modal: React.FC<IProps> = ({
                     required
                     pattern="^[+]?\d+([.]\d+)?$"
                     onChange={handleChange}
-                    className="shadow-sm  border text-gray-900 text-sm focus:outline-none rounded-lg 0 block w-full p-2.5"
+                    className="shadow-sm  border font-poppins text-gray-900 text-sm focus:outline-none rounded-lg 0 block w-full p-2.5"
                     placeholder="Room Number"
                   ></input>
                   <button
@@ -99,7 +99,7 @@ export const Modal: React.FC<IProps> = ({
                     }}
                     data-modal-toggle="small-modal"
                     type="submit"
-                    className="text-white bg-[#d94d4d] hover:bg-[#b32d2d]  focus:outline-none hover:shadow-md transition duration-300 ease-in-out font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                    className="text-white font-poppins bg-[#d94d4d] hover:bg-[#b32d2d]  focus:outline-none hover:shadow-md transition duration-300 ease-in-out font-medium rounded-lg text-sm px-5 py-2.5 text-center "
                   >
                     Join Game
                   </button>

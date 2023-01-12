@@ -63,10 +63,8 @@ const Home: NextPage<IProps> = ({
     setIsGameEnded(false)
   }, [])
 
-  console.log("index", cards)
-
   const constructDeck = () => {
-    console.log("here utils")
+    ;("here utils")
 
     const deck: string[] = []
 
@@ -172,7 +170,6 @@ const Home: NextPage<IProps> = ({
         }
 
         socket.emit("join_room", sendData)
-        console.log("send data", sendData)
         setStand({
           playerOne: false,
           playerTwo: false,
@@ -215,8 +212,6 @@ const Home: NextPage<IProps> = ({
 
       const confirmation = await library.waitForTransaction(createGame.hash)
 
-      console.log("game room", gameRoom)
-
       socket.emit("create_room", gameRoom.toString())
       // const newRoom = window.prompt()
       // socket.emit("create_room", newRoom?.toString())
@@ -257,7 +252,6 @@ const Home: NextPage<IProps> = ({
 
       const confirmation = await library.waitForTransaction(createGame.hash)
       setIsSinglePlayer(true)
-      console.log("game room", gameRoom)
       setIsGameActive(true)
 
       router.push(`/room/${gameRoom}`)
