@@ -217,7 +217,6 @@ export const Game: React.FC<IProps> = ({
 
   useEffect(() => {
     if (isGameEnded && currentDeck.length <= 4) {
-      ;("getting triggered")
       if (isSinglePlayer) {
         unlockBet(account, "1")
       } else {
@@ -552,7 +551,6 @@ export const Game: React.FC<IProps> = ({
   }
 
   const constructDeck = () => {
-    ;("here")
     const cardValues: string[] = [
       "2",
       "3",
@@ -729,7 +727,6 @@ export const Game: React.FC<IProps> = ({
     const usedDeck: string[] = deckData
     if (usedDeck.length >= 4) {
       // setRoundText([])
-      ;("in if statement")
       setAces({
         playerOneAces: 0,
         playerTwoAces: 0,
@@ -1006,7 +1003,6 @@ export const Game: React.FC<IProps> = ({
 
         // unlockBet(account, "1")
       } else {
-        ;("here?")
         dealCards(currentDeck)
       }
     } else {
