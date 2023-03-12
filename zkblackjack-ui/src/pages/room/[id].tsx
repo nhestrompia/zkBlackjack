@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react"
-import type { NextPage } from "next"
-import { Game } from "../../components/Game"
-import io from "socket.io-client"
-import { useRouter } from "next/router"
 import { ethers } from "ethers"
+import type { NextPage } from "next"
+import { useRouter } from "next/router"
+import { Game } from "../../components/Game"
 
 interface IProps {
   account: string
@@ -25,7 +23,7 @@ const Room: NextPage<IProps> = ({
   const room = id?.toString() ?? ""
 
   return (
-    <div className="h-screen w-fit overflow-hidden">
+    <div className="h-screen w-fit lg:overflow-hidden">
       <Game
         setIsLoading={setIsLoading}
         isLoading={isLoading}

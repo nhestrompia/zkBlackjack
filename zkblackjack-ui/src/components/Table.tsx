@@ -325,7 +325,7 @@ export const Table: React.FC<IProps> = ({
             </div>
 
             <div
-              className={`flex justify-evenly max-w-fit relative right-10 md:flex-row md:justify-center items-center  md:gap-8  md:mb-8`}
+              className={`flex justify-evenly max-w-fit relative right-8 md:right-10 md:flex-row md:justify-center items-center  md:gap-8  md:mb-8`}
             >
               <div className="w-28 h-28 absolute border-2  rounded-full"></div>
 
@@ -336,7 +336,7 @@ export const Table: React.FC<IProps> = ({
                       key={card}
                       className={` ${
                         index !== 0 ? "-ml-20  md:-ml-[8rem]" : ""
-                      }  flex gap-6  relative left-20`}
+                      }  flex gap-6  relative left-16 md:left-20`}
                     >
                       <Image
                         src={card}
@@ -374,8 +374,10 @@ export const Table: React.FC<IProps> = ({
 
               <h1
                 className={`relative top-24   ${
-                  cards.playerOneCards.length > 2 ? "right-32" : "right-24"
-                } text-white font-poppins text-xl`}
+                  cards.playerOneCards.length > 2
+                    ? "right-32"
+                    : "right-24 lg:right-[32%]"
+                } text-white font-poppins whitespace-nowrap text-lg lg:text-xl`}
               >
                 {cards.playerOneCards.length > 0 && truncateEthAddress(account)}
               </h1>
