@@ -1,17 +1,15 @@
+import { Contract, ethers } from "ethers"
 import Image from "next/image"
-import React, { useState, useReducer, useEffect } from "react"
-import { Scoreboard } from "./Scoreboard"
-import { ShareModal } from "./ShareModal"
-import truncateEthAddress from "truncate-eth-address"
-import { BigNumber, Contract, ethers, providers, utils } from "ethers"
-import { toast, ToastContainer } from "react-toastify"
+import React, { useEffect } from "react"
+import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import truncateEthAddress from "truncate-eth-address"
 import {
   BLACKJACK_CONTRACT_ABI,
   BLACKJACK_CONTRACT_ADDRESS,
 } from "../../constants"
-import { useSockets, Withdraw } from "../context/SocketContext"
-import { Score } from "../context/SocketContext"
+import { Score, useSockets } from "../context/SocketContext"
+import { Scoreboard } from "./Scoreboard"
 
 type CardGet = {
   startDeck?: string[] | undefined
@@ -148,7 +146,7 @@ export const Table: React.FC<IProps> = ({
     )
 
     const tx = await blackjackContract.withdrawSafe(
-      ethers.utils.parseEther("0.5")
+      ethers.utils.parseEther("0.3")
     )
   }
 
@@ -232,7 +230,7 @@ export const Table: React.FC<IProps> = ({
                     return (
                       <div
                         key={card}
-                        className="-ml-24 mt-2 md:mt-1 md:-ml-[8rem]"
+                        className="-ml-24 mt-2 md:mt-1 md:-ml-[7.8rem]"
                       >
                         <Image
                           src={"/cards/back.svg"}
